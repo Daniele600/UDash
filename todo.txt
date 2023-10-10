@@ -1,0 +1,2 @@
+in app.py reduce the traces_sample_rate for sentry_sdk
+in default_settings.py change the secretkey parameter

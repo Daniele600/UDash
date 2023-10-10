@@ -1,0 +1,17 @@
+
+dash==2.13.0
+sentry-sdk[flask]
+
+sqlalchemy==1.4.45
+
+flask-sqlalchemy==2.5.1
+Flask-Admin==1.6.0
+flask-login
+Flask-Migrate==3.1.0
+flask-cors==3.0.10
+
+requests
+requests-cache
+
+
+git+https://github.com/Daniele600/U_SDMX.git
