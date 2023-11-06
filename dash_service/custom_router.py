@@ -4,8 +4,9 @@ from urllib.parse import parse_qs, urlparse
 
 from werkzeug.datastructures import MultiDict
 from dash.exceptions import PreventUpdate
-from dash_service.pages import dashboard
+from dash_service.pages import dashboard, main_menu
 from flask import request
+from .db_utils import db_utils
 
 
 class CustomRouter:
@@ -54,10 +55,19 @@ class CustomRouter:
             if "prj" in qparams and len(qparams["prj"]) > 0:
                 param_prj = qparams["prj"][0]
 
+            page_type = db_utils().get_page_type(param_prj, param_page)
+            if page_type == db_utils.TYPE_DASHBOARD:
+                layout_to_use = dashboard.layout(**kwargs)
+            elif page_type == db_utils.TYPE_MENU:
+                layout_to_use = main_menu.layout(**kwargs)
+            else:
+                layout_to_use = None
+
             kwargs = MultiDict(qparams)
             kwargs["hash"] = url_hash
 
-            layout_to_use = dashboard.layout(**kwargs)
+            if layout_to_use is None:
+                layout = main_menu.layout()
 
             if CustomRouter._is_component(layout_to_use):
                 layout = layout_to_use
