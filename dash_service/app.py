@@ -9,7 +9,17 @@ from .layouts import base_layout
 from . import custom_router
 
 # from .extensions import admin, db, login_manager
-from .extensions import db
+from .extensions import db, flask_admin
+
+#The models, import for flask admin
+from .models import Dashboard, Project, MenuPage, User
+#The models' views, for flask admin
+from .views import DashboardView, ProjectView, UserView, MenuPageView, ExtFileAdmin
+from .app_settings import FILES_UPLOAD_PATH
+
+import os
+
+
 
 
 # Monitors the transactions and integrates with Flask
@@ -27,12 +37,19 @@ server.config.from_object(default_settings)
 register_extensions(server)
 
 
+
 # Flask-Admin
-# admin.add_view(ProjectView(Project, db.session))
-# admin.add_view(DashboardView(Dashboard, db.session))
-# admin.add_view(DataExplorerView(DataExplorer, db.session))
-# admin.add_view(MenuPageView(MenuPage, db.session))
-# admin.add_view(UserView(User, db.session))
+flask_admin.add_view(ProjectView(Project, db.session))
+flask_admin.add_view(DashboardView(Dashboard, db.session))
+flask_admin.add_view(MenuPageView(MenuPage, db.session))
+flask_admin.add_view(UserView(User, db.session))
+# production storage will be an Azure blob storage
+#check if files upload path exists, create if not
+files_upload_path = os.path.join(os.path.dirname(__file__), FILES_UPLOAD_PATH)
+if not os.path.isdir(files_upload_path):
+    os.makedirs(files_upload_path)
+#path = os.path.join(os.path.dirname(__file__), FILES_UPLOAD_PATH)
+flask_admin.add_view(ExtFileAdmin(files_upload_path, f"/{FILES_UPLOAD_PATH}/", name="Static Files"))
 
 
 app = Dash(
@@ -47,20 +64,20 @@ app = Dash(
 
 with server.app_context():
     db.create_all()
-    # # Check if there is at least one user
-    # first_user = User.query.first()
-    # # if not add the admin
+    # Check if there is at least one user
+    first_user = User.query.first()
+    # if not add the admin
 
-    # if first_user is None:
-    #     first_admin = User(
-    #         name="Deafult admin",
-    #         email="admin@admin.com",
-    #         password="admin",
-    #         is_admin=True,
-    #     )
+    if first_user is None:
+        first_admin = User(
+            name="Admin",
+            email="admin@admin.com",
+            password="admin",
+            is_admin=True,
+        )
 
-    #     db.session.add(first_admin)
-    #     db.session.commit()
+        db.session.add(first_admin)
+        db.session.commit()
 
 # Does not work, fix this
 # @server.errorhandler(404)

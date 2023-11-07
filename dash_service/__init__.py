@@ -1,12 +1,11 @@
-from .extensions import db, admin, cors, migrate, login_manager
-
+from .extensions import db, flask_admin, cors, migrate, login_manager
 
 def register_extensions(app):
     """Register Flask extensions."""
 
     db.init_app(app)
     migrate.init_app(app, db)
-    admin.init_app(app)
+    flask_admin.init_app(app)
     # cors.init_app(app)
     cors.init_app(app, resources={r"/*": {"origins": "*"}})
 
