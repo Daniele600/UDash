@@ -6,7 +6,7 @@ from werkzeug.datastructures import MultiDict
 from dash.exceptions import PreventUpdate
 from dash_service.pages import dashboard, main_menu
 from flask import request
-from .db_utils import db_utils
+from .db_access import db_access
 
 
 class CustomRouter:
@@ -55,10 +55,10 @@ class CustomRouter:
             if "prj" in qparams and len(qparams["prj"]) > 0:
                 param_prj = qparams["prj"][0]
 
-            page_type = db_utils().get_page_type(param_prj, param_page)
-            if page_type == db_utils.TYPE_DASHBOARD:
+            page_type = db_access().get_page_type(param_prj, param_page)
+            if page_type == db_access.TYPE_DASHBOARD:
                 layout_to_use = dashboard.layout(**kwargs)
-            elif page_type == db_utils.TYPE_MENU:
+            elif page_type == db_access.TYPE_MENU:
                 layout_to_use = main_menu.layout(**kwargs)
             else:
                 layout_to_use = None

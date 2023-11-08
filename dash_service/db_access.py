@@ -1,8 +1,9 @@
-from .models import Project, Dashboard, MenuPage
+from .models import Project, Dashboard, MenuPage,User
 from sqlalchemy import and_
+from flask_sqlalchemy import SQLAlchemy
 
 
-class db_utils:
+class db_access:
     TYPE_UNKNOWN = -1
     TYPE_DASHBOARD = 1
     TYPE_MENU = 2
@@ -15,7 +16,7 @@ class db_utils:
         ).first()
 
         if dashboard is not None:
-            return db_utils.TYPE_DASHBOARD
+            return db_access.TYPE_DASHBOARD
 
         menupage = (
             MenuPage.query.with_entities(MenuPage.id)
@@ -23,6 +24,9 @@ class db_utils:
             .filter(and_(Project.slug == prj_slug, MenuPage.slug==page_slug))
         ).first()
         if menupage is not None:
-            return db_utils.TYPE_MENU
+            return db_access.TYPE_MENU
         
-        return db_utils.TYPE_UNKNOWN
+        return db_access.TYPE_UNKNOWN
+    
+    def get_user_by_id(self, user_id):
+        return User.query.filter(User.id==user_id).first()

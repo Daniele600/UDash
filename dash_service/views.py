@@ -8,27 +8,17 @@ from .models import Page, MenuPage,User
 from wtforms.fields import PasswordField
 from wtforms import validators
 from .app_settings import FILES_UPLOAD_PATH
+import flask_login
 
-
-
-
-from sqlalchemy import select
-
-def is_admin():
-    print("ENABLE/INSTALL flask_login!")
-    # if flask_login.current_user.is_authenticated:
-    #     if flask_login.current_user.is_admin:
-    #         return True
-    # return False
-    return True
 
 def get_current_user()->User:
-    print("ENABLE/INSTALL flask_login!")
-    #return flask_login.current_user
-    ret = select(User).where(User.name=="Admin")
+    return flask_login.current_user
 
-
-    return ret
+def is_admin()->bool:
+    if flask_login.current_user.is_authenticated:
+        if flask_login.current_user.is_admin:
+            return True
+    return False
 
 
 
