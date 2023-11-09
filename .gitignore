@@ -160,3 +160,4 @@ cython_debug/
 #.idea/
 data_cache.sqlite
 dash_service/pages.db
+dash_service/upload

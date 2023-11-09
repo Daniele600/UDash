@@ -1,17 +1,13 @@
 import json
 import pathlib
-# from ..sdmx import data_access, data_access_sdmx
-# from ..sdmx.sdmx_utils import parse_data_query
 from USDMX import sdmx_data_access
 from datetime import datetime
 from dash import html
 import pandas as pd
 
-years = list(range(2007, datetime.now().year))
+from ..app_settings import FILES_UPLOAD_PATH
 
-# MOVE THIS IN CONFIG
-data_endpoint_id = "UNICEF"
-data_endpoint_url = "https://sdmx.data.unicef.org/ws/public/sdmxapi/rest"
+years = list(range(2007, datetime.now().year))
 
 
 def page_not_found(pathname):
@@ -19,8 +15,9 @@ def page_not_found(pathname):
 
 
 # def get_data(cfg_data, years=None, countries=[], last_n_obs=False, labels="id"):
-def get_structure(cfg_data, lang):
-    api_access = sdmx_data_access.SDMX_DataAccess(data_endpoint_id, data_endpoint_url)
+def get_structure(data_endpoint_url,cfg_data, lang):
+    #api_access = sdmx_data_access.SDMX_DataAccess(data_endpoint_id, data_endpoint_url)
+    api_access = sdmx_data_access.SDMX_DataAccess(data_endpoint_url)
 
     ret = api_access.get_dataflow_info(
         cfg_data["agency"], cfg_data["id"], cfg_data["version"], lang
@@ -28,8 +25,8 @@ def get_structure(cfg_data, lang):
 
     return ret
 
-def get_data(cfg_data, years=None, lastnobservations=None, labels="id"):
-    api_access = sdmx_data_access.SDMX_DataAccess(data_endpoint_id, data_endpoint_url)
+def get_data(data_endpoint_url,cfg_data, years=None, lastnobservations=None, labels="id"):
+    api_access = sdmx_data_access.SDMX_DataAccess(data_endpoint_url)
 
     startperiod = None
     endperiod = None
@@ -60,9 +57,9 @@ def get_data(cfg_data, years=None, lastnobservations=None, labels="id"):
 # Get geoJson
 def get_geojson(geoj_filename: str):
     geojson_path = (
-        f"{pathlib.Path(__file__).parent.parent.absolute()}/static/{geoj_filename}"
+        f"{pathlib.Path(__file__).parent.parent.absolute()}/{FILES_UPLOAD_PATH}/{geoj_filename}"
     )
-
+    
     with open(geojson_path) as shapes_file:
         geo_json_data = json.load(shapes_file)
     return geo_json_data
@@ -78,11 +75,12 @@ def get_structure_id(data_node):
 
 
 # Downloads and adds the structure to the struct object if it doesn't exist, skips otherwise
-def add_structure(structs, data_cfg, lang):
+def add_structure(data_endpoint_url, structs, data_cfg, lang):
     struct_id = get_structure_id(data_cfg)
+
     if not struct_id in structs:
         # print("GETTING " + struct_id)
-        structs[struct_id] = get_structure(data_cfg, lang)
+        structs[struct_id] = get_structure(data_endpoint_url,data_cfg, lang)
     # else:
     # print(">>SKIPPED " + struct_id)
 

@@ -368,6 +368,7 @@ def show_themes(selections, config):
 # Typically 1 dataflow per page but can handle data from multiple Dataflows in 1 page
 def download_structures(selections, page_config, lang):
     data_structures = {}
+    enpoint_url = page_config["global_data_endpoint"]
 
     theme_node = page_config[CFG_N_THEMES][selections["theme"]]
 
@@ -377,7 +378,7 @@ def download_structures(selections, page_config, lang):
                 for elem in row["elements"]:
                     if "data" in elem:
                         if isinstance(elem["data"], dict):
-                            add_structure(data_structures, elem["data"], lang)
+                            add_structure(enpoint_url,data_structures, elem["data"], lang)
                         elif isinstance(elem["data"], list):
                             for data_elem in elem["data"]:
 
@@ -386,11 +387,11 @@ def download_structures(selections, page_config, lang):
                                         "multi_indicator"
                                     ]:
                                         add_structure(
-                                            data_structures, multi_indic_node, lang
+                                            enpoint_url,data_structures, multi_indic_node, lang
                                         )
                                 else:
 
-                                    add_structure(data_structures, data_elem, lang)
+                                    add_structure(enpoint_url,data_structures, data_elem, lang)
 
     return data_structures
 
@@ -443,7 +444,7 @@ def _create_card(data_struct, page_config, elem_info, lang):
     if data_node is not None:
         # we only need the most recent datapoint, no labels, just the value
         try:
-            df = get_data(data_node, lastnobservations=1, labels="id")
+            df = get_data(page_config["global_data_endpoint"],data_node, lastnobservations=1, labels="id")
         # except ConnectionError as conn_err:
         except requests.exceptions.HTTPError as e:
             print_exception("Exception while downloading data for card", e)
@@ -712,7 +713,7 @@ def update_charts(
         tmp_inidic_label = []
         for multi_indic_cfg in data_cfg["multi_indicator"]:
             try:
-                data_chunk = get_data(multi_indic_cfg, years=time_period)
+                data_chunk = get_data(page_config["global_data_endpoint"],multi_indic_cfg, years=time_period)
                 api_call["calls"].append(
                     {
                         "cfg": multi_indic_cfg,
@@ -747,7 +748,7 @@ def update_charts(
             lastnobservations = 1
 
         try:
-            df = get_data(
+            df = get_data(page_config["global_data_endpoint"],
                 data_cfg, years=time_period, lastnobservations=lastnobservations
             )
             api_call["calls"].append(
@@ -916,7 +917,7 @@ def update_maps(
         lastnobs = 1
     api_call = {"component_id": component_id, "calls": []}
     try:
-        df = get_data(elem_data_node, years=time_period, lastnobservations=lastnobs)
+        df = get_data(page_config["global_data_endpoint"],elem_data_node, years=time_period, lastnobservations=lastnobs)
         api_call["calls"].append(
             {
                 "cfg": elem_data_node,
@@ -1010,7 +1011,7 @@ def _find_triggerer(context, charts, maps):
 def _get_data_for_download(api_calls):
     df = pd.DataFrame()
     for a in api_calls:
-        to_concat = get_data(
+        to_concat = get_data(page_config["global_data_endpoint"],
             a["cfg"],
             a.get("years", None),
             a.get("lastnobservations", None),

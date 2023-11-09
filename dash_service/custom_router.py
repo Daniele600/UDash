@@ -55,6 +55,9 @@ class CustomRouter:
             if "prj" in qparams and len(qparams["prj"]) > 0:
                 param_prj = qparams["prj"][0]
 
+            kwargs = MultiDict(qparams)
+            kwargs["hash"] = url_hash
+
             page_type = db_access().get_page_type(param_prj, param_page)
             if page_type == db_access.TYPE_DASHBOARD:
                 layout_to_use = dashboard.layout(**kwargs)
@@ -63,8 +66,7 @@ class CustomRouter:
             else:
                 layout_to_use = None
 
-            kwargs = MultiDict(qparams)
-            kwargs["hash"] = url_hash
+
 
             if layout_to_use is None:
                 layout = main_menu.layout()

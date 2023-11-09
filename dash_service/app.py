@@ -50,7 +50,7 @@ flask_admin.add_view(UserView(User, db.session))
 files_upload_path = os.path.join(os.path.dirname(__file__), FILES_UPLOAD_PATH)
 if not os.path.isdir(files_upload_path):
     os.makedirs(files_upload_path)
-flask_admin.add_view(ExtFileAdmin(files_upload_path, f"/{FILES_UPLOAD_PATH}/", name="Static Files"))
+flask_admin.add_view(ExtFileAdmin(files_upload_path, f"/{FILES_UPLOAD_PATH}/", name="File upload"))
 
 class LogoutMenuLink(MenuLink):
     def is_accessible(self):

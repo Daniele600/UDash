@@ -75,7 +75,6 @@ class DashboardView(ModelView):
     #up = upload_files_path
     upload_files_path = os.path.join(os.path.dirname(__file__), FILES_UPLOAD_PATH)
 
-    # uploaded_files_path="/dash_service/static"
     if os.path.isdir(upload_files_path):
         for f in os.listdir(upload_files_path):
             if os.path.isfile(os.path.join(upload_files_path, f)):
