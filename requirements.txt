@@ -4,6 +4,7 @@ dash-bootstrap-components==1.5.0
 sentry-sdk[flask]
 
 sqlalchemy==1.4.45
+psycopg2
 
 flask-sqlalchemy==2.5.1
 Flask-Admin==1.6.0
