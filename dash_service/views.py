@@ -7,7 +7,7 @@ from sqlalchemy.sql import func
 from .models import Page, Splashpage,User
 from wtforms.fields import PasswordField
 from wtforms import validators
-from .app_settings import FILES_UPLOAD_PATH
+from .app_settings import FILES_UPLOAD_PATH,FILES_UPLOAD_ALLOWED_EXT
 import flask_login
 
 
@@ -229,8 +229,17 @@ class UserView(ModelView):
 
 
 class ExtFileAdmin(FileAdmin):
+    # def __init__(self, base_path, *args, **kwargs):
+    #     super().__init__(base_path, *args, **kwargs)
+
+    allowed_extensions = FILES_UPLOAD_ALLOWED_EXT
+
+    #upload_template = 'templates/admin/extFileForml.html'
+    upload_template = 'admin/file/extFileForml.html'
+
     def is_accessible(self):
         return is_admin()
+
 
 
 # # production storage will be an Azure blob storage
