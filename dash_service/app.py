@@ -11,9 +11,9 @@ from . import custom_router
 from .extensions import db, flask_admin, login_manager
 
 #The models, import for flask admin
-from .models import Dashboard, Project, MenuPage, User
+from .models import Dashboard, Project, Splashpage, User
 #The models' views, for flask admin
-from .views import DashboardView, ProjectView, UserView, MenuPageView, ExtFileAdmin
+from .views import DashboardView, ProjectView, UserView, SplashView, ExtFileAdmin
 from .app_settings import FILES_UPLOAD_PATH
 from .db_access import db_access
 import flask_login
@@ -43,7 +43,7 @@ register_extensions(server)
 # Flask-Admin
 flask_admin.add_view(ProjectView(Project, db.session))
 flask_admin.add_view(DashboardView(Dashboard, db.session))
-flask_admin.add_view(MenuPageView(MenuPage, db.session))
+flask_admin.add_view(SplashView(Splashpage, db.session))
 flask_admin.add_view(UserView(User, db.session))
 # production storage will be an Azure blob storage
 #check if files upload path exists, create if not

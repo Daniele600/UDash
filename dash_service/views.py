@@ -4,7 +4,7 @@ import os
 from flask_admin.contrib.sqla import ModelView
 from flask_admin.contrib.fileadmin import FileAdmin
 from sqlalchemy.sql import func
-from .models import Page, MenuPage,User
+from .models import Page, Splashpage,User
 from wtforms.fields import PasswordField
 from wtforms import validators
 from .app_settings import FILES_UPLOAD_PATH
@@ -100,7 +100,7 @@ class DashboardView(ModelView):
         )
     
 
-class MenuPageView(ModelView):
+class SplashView(ModelView):
     column_display_all_relations = True
     column_list = (
         "project",

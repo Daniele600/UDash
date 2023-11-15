@@ -1,4 +1,4 @@
-from .models import Project, Dashboard, MenuPage,User
+from .models import Project, Dashboard, Splashpage,User
 from sqlalchemy import and_
 from flask_sqlalchemy import SQLAlchemy
 
@@ -6,7 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 class db_access:
     TYPE_UNKNOWN = -1
     TYPE_DASHBOARD = 1
-    TYPE_MENU = 2
+    TYPE_SPLASH = 2
 
     def get_page_type(self, prj_slug, page_slug):
         dashboard = (
@@ -18,13 +18,17 @@ class db_access:
         if dashboard is not None:
             return db_access.TYPE_DASHBOARD
 
-        menupage = (
-            MenuPage.query.with_entities(MenuPage.id)
-            .join(Project)
-            .filter(and_(Project.slug == prj_slug, MenuPage.slug==page_slug))
-        ).first()
-        if menupage is not None:
-            return db_access.TYPE_MENU
+        # menupage = (
+        #     MenuPage.query.with_entities(MenuPage.id)
+        #     .join(Project)
+        #     .filter(and_(Project.slug == prj_slug, MenuPage.slug==page_slug))
+        # ).first()
+        # if menupage is not None:
+        #     return db_access.TYPE_MENU
+        
+        splashpage = Splashpage.query.with_entities(Splashpage.id).join(Project).filter(and_(Project.slug == prj_slug, Splashpage.slug==page_slug)).first()
+        if splashpage is not None:
+            return db_access.TYPE_SPLASH
         
         return db_access.TYPE_UNKNOWN
     

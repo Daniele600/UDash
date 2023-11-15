@@ -56,7 +56,8 @@ def get_data(data_endpoint_url,cfg_data, years=None, lastnobservations=None, lab
 
 # Get geoJson
 def get_geojson(geoj_filename: str):
-    geojson_path =         f"/{FILES_UPLOAD_PATH}/{geoj_filename}"
+    geojson_path =f"./dash_service/{FILES_UPLOAD_PATH}/{geoj_filename}"
+    print(geojson_path)
     
     with open(geojson_path) as shapes_file:
         geo_json_data = json.load(shapes_file)

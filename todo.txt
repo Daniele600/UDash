@@ -1,2 +1,4 @@
 in app.py reduce the traces_sample_rate for sentry_sdk
 in default_settings.py change the secretkey parameter
+Check the upload directory format: limit to .json (geoJson)?
+Login page

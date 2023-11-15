@@ -1,5 +1,5 @@
 from dash import callback, dcc, html
-from dash_service.models import Page, MenuPage
+from dash_service.models import Page, Splashpage
 import unicodedata
 import dash_bootstrap_components as dbc
 
@@ -13,27 +13,27 @@ def layout(project_slug=None, page_slug=None, lang="en", **query_params):
             if unicodedata.category(c) != "Mn"
         )
     
-    menu_pages = "There are no menu pages defined yet" 
+    splashpages = "There are no splash pages defined yet" 
     dashboards_pages = "There are no dashboard pages defined yet" 
 
-    all_menupages = MenuPage.query.all()
+    all_splashpages = Splashpage.query.all()
     all_dashboards = Page.query.all()
     
-    print(all_menupages)
+    print(all_splashpages)
     print(all_dashboards)
     
-    all_menupages.sort(key=lambda x: (x.project.name, strip_accents(x.title)))
+    all_splashpages.sort(key=lambda x: (x.project.name, strip_accents(x.title)))
     all_dashboards.sort(key=lambda x: (x.project.name, strip_accents(x.title)))
     
-    if all_menupages is not None and len(all_menupages)>0:
+    if all_splashpages is not None and len(all_splashpages)>0:
         tbl_header_menu = [html.Thead(html.Tr([html.Th("Project"),html.Th("Page"), html.Th("Link")]))]
-        for menu in all_menupages:
+        for spl in all_splashpages:
             tbl_rows = []
-            lnk = html.A(children=(menu.title),href=f"?prj={menu.project.slug}&page={menu.slug}")
-            tbl_rows.append(html.Tr([html.Td(menu.project.name),html.Td(menu.title),html.Td(lnk)]))
+            lnk = html.A(children=(spl.title),href=f"?prj={spl.project.slug}&page={spl.slug}")
+            tbl_rows.append(html.Tr([html.Td(spl.project.name),html.Td(spl.title),html.Td(lnk)]))
         tbl_body_menu = [html.Tbody(tbl_rows)]
     
-        menu_pages=dbc.Table(tbl_header_menu + tbl_body_menu, bordered=True)
+        splashpages=dbc.Table(tbl_header_menu + tbl_body_menu, bordered=True)
 
     if all_dashboards is not None and len(all_dashboards)>0:
         tbl_header = [html.Thead(html.Tr([html.Th("Project"),html.Th("Page"), html.Th("Link")]))]
@@ -46,7 +46,7 @@ def layout(project_slug=None, page_slug=None, lang="en", **query_params):
         dashboards_pages=dbc.Table(tbl_header + tbl_body, bordered=True)
 
     header_menupages = html.Div(className = "row", children=[html.H2("Splash pages")])
-    menu_pages_div=html.Div(className = "row col", children=[menu_pages])
+    splashpages_div=html.Div(className = "row col", children=[splashpages])
 
     header_dashboards = html.Div(className = "row", children=[html.H2("Dashboards")])
     dashboard_div=html.Div(className = "row col", children=[dashboards_pages])
@@ -58,7 +58,7 @@ def layout(project_slug=None, page_slug=None, lang="en", **query_params):
     ret = html.Div(
         #className="container",
         children=[
-            html.Div(children=[header_menupages,menu_pages_div]),
+            html.Div(children=[header_menupages,splashpages_div]),
             html.Div(children=[header_dashboards,dashboard_div]),
         ],
     )

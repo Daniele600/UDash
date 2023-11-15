@@ -73,8 +73,8 @@ class Dashboard(Page):
     geography = db.Column(db.String(80), nullable=True)
 
     
-class MenuPage(Page):
-    __tablename__ = "menupages"
+class Splashpage(Page):
+    __tablename__ = "splashpages"
 
     id = column_property(db.Column(db.Integer, primary_key=True), Page.id)
     page_id = db.Column(db.Integer, db.ForeignKey("pages.id"))
@@ -82,7 +82,7 @@ class MenuPage(Page):
     content = db.Column(db.JSON, nullable=False)
 
     def __repr__(self):
-        return "<Manu page %r>" % self.title
+        return "<Splashpage %r>" % self.title
 
 
 class User(db.Model):
