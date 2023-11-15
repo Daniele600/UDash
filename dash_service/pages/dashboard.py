@@ -1008,7 +1008,7 @@ def _find_triggerer(context, charts, maps):
     return None
 
 
-def _get_data_for_download(api_calls):
+def _get_data_for_download(api_calls, page_config):
     df = pd.DataFrame()
     for a in api_calls:
         to_concat = get_data(page_config["global_data_endpoint"],
@@ -1030,14 +1030,15 @@ def _get_data_for_download(api_calls):
     [
         State(ChartAIO.ids.download_api_call(ALL), "value"),
         State(MapAIO.ids.download_api_call(ALL), "value"),
+        State("page_config", "data")
     ],
     prevent_initial_call=True,
 )
 # Downloads the DSD for the data.
-def download_excel(n_clicks, chart_api_call, map_api_call):
+def download_excel(n_clicks, chart_api_call, map_api_call,page_config):
 
     triggered_cfg = _find_triggerer(ctx.triggered_id, chart_api_call, map_api_call)
-    df = _get_data_for_download(triggered_cfg)
+    df = _get_data_for_download(triggered_cfg,page_config)
     return dcc.send_data_frame(df.to_excel, "data.xlsx", index=False)
 
 
@@ -1050,13 +1051,14 @@ def download_excel(n_clicks, chart_api_call, map_api_call):
     [
         State(ChartAIO.ids.download_api_call(ALL), "value"),
         State(MapAIO.ids.download_api_call(ALL), "value"),
+        State("page_config", "data")
     ],
     prevent_initial_call=True,
 )
 # Downloads the DSD for the data.
-def download_csv(n_clicks, chart_api_call, map_api_call):
+def download_csv(n_clicks, chart_api_call, map_api_call,page_config):
     triggered_cfg = _find_triggerer(ctx.triggered_id, chart_api_call, map_api_call)
-    df = _get_data_for_download(triggered_cfg)
+    df = _get_data_for_download(triggered_cfg,page_config)
     return dcc.send_data_frame(df.to_csv, "data.csv", index=False, encoding="utf8")
 
 

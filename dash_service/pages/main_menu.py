@@ -19,9 +19,6 @@ def layout(project_slug=None, page_slug=None, lang="en", **query_params):
     all_splashpages = Splashpage.query.all()
     all_dashboards = Page.query.all()
     
-    print(all_splashpages)
-    print(all_dashboards)
-    
     all_splashpages.sort(key=lambda x: (x.project.name, strip_accents(x.title)))
     all_dashboards.sort(key=lambda x: (x.project.name, strip_accents(x.title)))
     

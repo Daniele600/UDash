@@ -135,14 +135,14 @@ class SplashView(ModelView):
         if is_admin():
             return self.session.query(self.model)
         return self.session.query(self.model).filter(
-            MenuPage.project_id == get_current_user().project_id
+            Splashpage.project_id == get_current_user().project_id
         )
 
     def get_count_query(self):
         if is_admin():
             return self.session.query(func.count("*"))
         return self.session.query(func.count("*")).filter(
-            MenuPage.project_id == get_current_user().project_id
+            Splashpage.project_id == get_current_user().project_id
         )
 
 
