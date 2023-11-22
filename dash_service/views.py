@@ -330,7 +330,7 @@ class SplashView(ModelView):
     #     "content"
     # ]
 
-    fields_to_create = ('project','title','slug','content',rules.HTML('<div id="formio"></div>'))
+    fields_to_create = ('project','title','slug',rules.HTML('<div id="formio"></div>'),'content')
 
 
 
