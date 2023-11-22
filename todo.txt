@@ -1,4 +1,8 @@
 in app.py reduce the traces_sample_rate for sentry_sdk
 in default_settings.py change the secretkey parameter
-Check the upload directory format: limit to .json (geoJson)?
 Login page
+Error logging
+CORS: https://www.youtube.com/watch?v=vWl5XcvQBx0&list=PLXmMXHVSvS-CoYS177-UvMAQYRfL3fBtX&index=130
+
+Done
+Check the upload directory format: limit to .json (geoJson)?

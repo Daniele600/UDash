@@ -13,7 +13,7 @@ from .extensions import db, flask_admin, login_manager
 #The models, import for flask admin
 from .models import Dashboard, Project, Splashpage, User
 #The models' views, for flask admin
-from .views import DashboardView, ProjectView, UserView, SplashView, ExtFileAdmin
+from .views import DashboardView, ProjectView, UserView, SplashView, ExtFileAdmin, ConfigEditorView
 from .app_settings import FILES_UPLOAD_PATH
 from .db_access import db_access
 import flask_login
@@ -43,7 +43,7 @@ register_extensions(server)
 # Flask-Admin
 flask_admin.add_view(ProjectView(Project, db.session))
 flask_admin.add_view(DashboardView(Dashboard, db.session))
-flask_admin.add_view(SplashView(Splashpage, db.session))
+#flask_admin.add_view(SplashView(Splashpage, db.session))
 flask_admin.add_view(UserView(User, db.session))
 # production storage will be an Azure blob storage
 #check if files upload path exists, create if not
@@ -56,6 +56,9 @@ class LogoutMenuLink(MenuLink):
     def is_accessible(self):
         return flask_login.current_user.is_authenticated
 flask_admin.add_link(LogoutMenuLink(name="Logout", category="", url="/logout"))
+
+flask_admin.add_view(ConfigEditorView(name="Config editor", endpoint="configs"))
+flask_admin.add_view(SplashView(Splashpage, db.session))
 
 
 

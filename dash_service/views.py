@@ -2,13 +2,14 @@ import os
 #import pathlib
 
 from flask_admin.contrib.sqla import ModelView
-from flask_admin.contrib.fileadmin import FileAdmin
+from flask_admin.contrib.fileadmin import FileAdmin, BaseView, expose
 from sqlalchemy.sql import func
 from .models import Page, Splashpage,User
 from wtforms.fields import PasswordField
 from wtforms import validators
 from .app_settings import FILES_UPLOAD_PATH,FILES_UPLOAD_ALLOWED_EXT
 import flask_login
+import flask
 
 
 def get_current_user()->User:
@@ -99,7 +100,7 @@ class DashboardView(ModelView):
             Page.project_id == get_current_user().project_id
         )
     
-
+'''
 class SplashView(ModelView):
     column_display_all_relations = True
     column_list = (
@@ -144,7 +145,7 @@ class SplashView(ModelView):
         return self.session.query(func.count("*")).filter(
             Splashpage.project_id == get_current_user().project_id
         )
-
+'''
 
 class UserView(ModelView):
     #On create form add the DataRequired validator
@@ -239,6 +240,17 @@ class ExtFileAdmin(FileAdmin):
 
     def is_accessible(self):
         return is_admin()
+    
+class ConfigEditorView(BaseView):
+    @expose("/")
+    def index(self):
+        DEFAULT_DATA_ENDPOINT = "https://sdmx.data.unicef.org/ws/public/sdmxapi/rest"
+        return self.render("admin/config_editor.html", def_data_endpoint = DEFAULT_DATA_ENDPOINT, txt_config_json="txt_config_json")
+
+    # def render(self, template, **kwargs):
+    #     self.extra_js = [flask.url_for("_dash_assets.static", filename="js/test.js")]
+
+    #     return super(ConfigEditorView, self).render(template, **kwargs)
 
 
 
@@ -247,3 +259,124 @@ class ExtFileAdmin(FileAdmin):
 
 # admin.add_view(FileAdmin(path, "/static/", name="Static Files"))
 #admin.add_view(ExtFileAdmin(path, "/static/", name="Static Files"))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+from wtforms import StringField
+from wtforms.widgets import TextArea
+from wtforms.widgets import HiddenInput
+from wtforms.widgets import Input
+from wtforms.fields import Field
+from flask_admin.form import rules
+
+class CustomForm(StringField):
+    #widget = Input()
+    widget = TextArea()
+    #widget = HiddenInput()
+
+
+class SplashView(ModelView):
+    edit_template = "admin/splash_editor.html"
+    
+    column_display_all_relations = True
+    form_excluded_columns = ["page", "created_at","updated_at"]
+
+    column_list = (
+        "project",
+        "title",
+        "slug",
+        "created_at",
+        "updated_at",
+    )
+
+    form_widget_args = {
+        "created_at": {"disabled": True},
+        "updated_at": {"disabled": True},
+    }
+
+    # fields_order = [
+    #     "project",
+    #     "title",
+    #     "slug",
+    #     "form_io",
+    #     "content"
+    # ]
+
+    fields_to_create = ('project','title','slug','content',rules.HTML('<div id="formio"></div>'))
+
+
+
+
+    #form_create_rules = fields_order
+    #form_edit_rules = fields_order
+
+    #form_overrides = {"content":CustomForm}
+
+    # form_rules=[
+    #     rules.field("slug"),
+    #     rules.field("updated_at")
+    # ]
+
+    form_edit_rules = fields_to_create
+    form_edit_rules = fields_to_create
+
+    def on_model_change(self, form, instance, is_created):
+        print("Form content")
+        print(form.content)
+
+
+
+    '''
+    
+    
+
+
+    
+
+
+
+    def is_accessible(self):
+        return get_current_user().is_authenticated
+
+    def get_query(self):
+        if is_admin():
+            return self.session.query(self.model)
+        return self.session.query(self.model).filter(
+            Splashpage.project_id == get_current_user().project_id
+        )
+
+    def get_count_query(self):
+        if is_admin():
+            return self.session.query(func.count("*"))
+        return self.session.query(func.count("*")).filter(
+            Splashpage.project_id == get_current_user().project_id
+        )
+    '''

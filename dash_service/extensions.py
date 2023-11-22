@@ -23,5 +23,5 @@ from flask_login import LoginManager
 cors = CORS()
 db = SQLAlchemy(session_options={"autocommit": False})
 migrate = Migrate()
-flask_admin = Admin(name="Dash Service", template_mode="bootstrap3")
+flask_admin = Admin(name="Dash Service", template_mode="bootstrap4")
 login_manager = LoginManager()
