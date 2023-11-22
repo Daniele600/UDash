@@ -348,10 +348,14 @@ class SplashView(ModelView):
     form_edit_rules = fields_to_create
     form_edit_rules = fields_to_create
 
-    def on_model_change(self, form, instance, is_created):
-        print("Form content")
-        print(form.content)
+    # def on_model_change(self, form, instance, is_created):
+    #     print("Form content")
+    #     print(form.content) 
 
+    # def on_form_prefill(self, form, id):
+    #     print("Prefill")
+    #     print(form.content)
+    #     print(id)
 
 
     '''
