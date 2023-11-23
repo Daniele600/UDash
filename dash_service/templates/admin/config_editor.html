@@ -126,6 +126,18 @@ Form io End
         }]
     }
 
+    const vals = [{label:"Aaa", value:"a"},{label:"Bbb", value:"b"}]
+    const dataflowid_to_selection = function(result){
+        //console.log("In fun")
+        //console.log(result)
+        let ret = []
+        result.forEach((elem)=>{
+            let df_id = elem["agency"]+","+elem["id"]+","+elem["version"];
+            ret.push({label:df_id, value:df_id})});
+
+        return ret;
+    }
+
     Formio.createForm(document.getElementById('formio'), {
         components: [
             {
@@ -153,13 +165,46 @@ Form io End
                 components: [dataflow_id]
             },
             {
-                "label": "Select",
-                "widget": "choicesjs",
-                "tableView": true,
-                "key": "select2",
-                "type": "select",
+                "label": "Dataflow2",
+                "optionsLabelPosition": "right",
+                "inline": true,
+                "tableView": false,
+                "key": "df_select2",
+                "type": "radio",
                 "input": true,
-                "dataSrc": "json",
+                //"dataSrc": "custom",
+                "values" : vals,
+                "dataType": "object",
+                "idPath": "dataflows",
+                "valueProperty": "data",
+                "refreshOn": "data",
+            },
+            {
+                "label": "Dataflow",
+                "optionsLabelPosition": "right",
+                "inline": true,
+                "tableView": false,
+                "key": "df_select",
+                "type": "radio",
+                "input": true,
+                "values": [
+                    {
+                        "label": "a",
+                        "value": "aa",
+                        "shortcut": ""
+                    },
+                    {
+                        "label": "b",
+                        "value": "bb",
+                        "shortcut": ""
+                    },
+                    {
+                        "label": "c",
+                        "value": "cc",
+                        "shortcut": ""
+                    }
+                ],
+                //"dataSrc": "json",
                 //data:{"custom": "console.log(data.dataflows);values = data.dataflows"}
                 "logic": [
                     {
@@ -169,11 +214,17 @@ Form io End
                             "javascript": "result = data.dataflows; console.log('df');console.log(result); return result"
                         },
                         "actions": [
-                        {
-                            "name": "aa",
-                            "type": "customAction",
-                            "customAction": "console.log('sss');console.log(result);data.select2 = [{\"a\":\"b\"},{\"a\":\"b\"}]"
-                        }
+                            {
+                                "name": "aa",
+                                "type": "customAction",
+                                //"customAction": "console.log('sss');console.log(result);console.log(typeof(result));values:vals"
+                                "customAction":"console.log('sss');console.log(result);console.log(typeof(result));component.values = dataflowid_to_selection(result)"
+                            },
+                            {
+                                name: "ac",
+                                "type": "mergeComponentSchema",
+                                "schemaDefinition": "return {data:{values:[{label:\"A\", value:\"a\"}]}}"
+                            }
                         ]
                     }
                 ],
@@ -191,6 +242,7 @@ Form io End
         form.on('change', function () {
 
             console.log(form.submission);
+            console.log(form)
             document.getElementById("{{txt_config_json}}").setAttribute("data-json_cfg", JSON.stringify(form.submission));
         });
     })
