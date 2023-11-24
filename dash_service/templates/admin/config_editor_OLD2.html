@@ -126,14 +126,14 @@ Form io End
         }]
     }
 
-    const vals = [{label:"Aaa", value:"a"},{label:"Bbb", value:"b"}]
-    const dataflowid_to_selection = function(result){
-        //console.log("In fun")
-        //console.log(result)
+    const dataflowid_to_selection = function (result) {
         let ret = []
-        result.forEach((elem)=>{
-            let df_id = elem["agency"]+","+elem["id"]+","+elem["version"];
-            ret.push({label:df_id, value:df_id})});
+        result.forEach((elem) => {
+            if (elem["agency"].trim() != "" && elem["id"].trim() != "" && elem["version"].trim() != "") {
+                let df_id = elem["agency"] + "," + elem["id"] + "," + elem["version"];
+                ret.push({ label: df_id, value: df_id })
+            }
+        });
 
         return ret;
     }
@@ -165,21 +165,6 @@ Form io End
                 components: [dataflow_id]
             },
             {
-                "label": "Dataflow2",
-                "optionsLabelPosition": "right",
-                "inline": true,
-                "tableView": false,
-                "key": "df_select2",
-                "type": "radio",
-                "input": true,
-                //"dataSrc": "custom",
-                "values" : vals,
-                "dataType": "object",
-                "idPath": "dataflows",
-                "valueProperty": "data",
-                "refreshOn": "data",
-            },
-            {
                 "label": "Dataflow",
                 "optionsLabelPosition": "right",
                 "inline": true,
@@ -187,43 +172,19 @@ Form io End
                 "key": "df_select",
                 "type": "radio",
                 "input": true,
-                "values": [
-                    {
-                        "label": "a",
-                        "value": "aa",
-                        "shortcut": ""
-                    },
-                    {
-                        "label": "b",
-                        "value": "bb",
-                        "shortcut": ""
-                    },
-                    {
-                        "label": "c",
-                        "value": "cc",
-                        "shortcut": ""
-                    }
-                ],
                 //"dataSrc": "json",
-                //data:{"custom": "console.log(data.dataflows);values = data.dataflows"}
                 "logic": [
                     {
                         "name": "aaa",
                         "trigger": {
                             "type": "javascript",
-                            "javascript": "result = data.dataflows; console.log('df');console.log(result); return result"
+                            "javascript": "return data.dataflows;"
                         },
                         "actions": [
                             {
                                 "name": "aa",
                                 "type": "customAction",
-                                //"customAction": "console.log('sss');console.log(result);console.log(typeof(result));values:vals"
-                                "customAction":"console.log('sss');console.log(result);console.log(typeof(result));component.values = dataflowid_to_selection(result)"
-                            },
-                            {
-                                name: "ac",
-                                "type": "mergeComponentSchema",
-                                "schemaDefinition": "return {data:{values:[{label:\"A\", value:\"a\"}]}}"
+                                "customAction": "component.values = dataflowid_to_selection(result)"
                             }
                         ]
                     }

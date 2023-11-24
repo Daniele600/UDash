@@ -162,6 +162,12 @@ def layout(lang="en", **query_params):
     page_config = db_config.content
     geography = db_config.geography
 
+    print("page_config")
+    print("page_config")
+    print("page_config")
+    print("page_config")
+    print(page_config)
+
     return render_page_template(
         page_config, geography, lang, query_params, project_slug
     )

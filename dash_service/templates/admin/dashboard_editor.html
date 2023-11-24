@@ -1,0 +1,182 @@
+{% extends 'admin/model/edit.html' %}
+{% block head %}
+{{super()}}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+<!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap/dist/css/bootstrap.min.css"> -->
+<script src="https://cdn.form.io/js/formio.embed.js"></script>
+
+<style>
+    .visually-hidden {
+        display: none;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+{{ super() }}
+
+
+{% endblock %}
+
+{% block tail%}
+
+
+<script>
+    const dataflow_id = [{
+        type: 'textfield',
+        key: 'dataflow_id',
+        label: 'Dataflow Id',
+        placeholder: "AGENCY,ID,VERSION",
+        description: "Add the Dataflow's Agency, id, and version separated by a comma",
+        input: true,
+        tableview: false,
+    }]
+
+    const dashb_element = {
+        components: [
+
+
+            {
+                "label": "Dataflow",
+                "optionsLabelPosition": "right",
+                "inline": true,
+                "tableView": false,
+                "key": "dataflow",
+                "type": "radio",
+                "input": true,
+                "logic": [
+                    {
+                        "name": "logic_radio_upd_trigger",
+                        "trigger": {
+                            "type": "javascript",
+                            "javascript": "return data.dataflows;"
+                        },
+                        "actions": [
+                            {
+                                "name": "action_set_dataflow_radio",
+                                "type": "customAction",
+                                "customAction": "component.values = dataflowid_to_selection(result)"
+                            }
+                        ]
+                    }
+                ],
+            },
+
+
+
+
+
+
+
+
+
+
+
+
+            {
+                type: 'select',
+                key: 'type',
+                label: 'Element type',
+                defaultValue: 'card',
+                data: { values: [{ label: "Card", value: "card" }, { label: "Map", value: "map" }, { label: "Chart", value: "chart" }] },
+                input: true
+            },
+
+            {
+                type: "panel",
+                title: 'Data',
+                label: 'Data query',
+                key: 'data',
+                components: [
+                    {
+                        type: 'textfield',
+                        key: 'dq',
+                        label: 'Data query',
+                        input: true,
+                        tableview: true,
+                    },
+                    {
+                        type: 'checkbox',
+                        key: 'lastnobservations',
+                        label: 'Only most recent values',
+                        input: true,
+                        tableview: true,
+                    }]
+            },
+
+            {
+                type: 'textfield',
+                key: 'label',
+                label: 'Label',
+
+                input: true,
+                //tooltip: 'Enter your <strong>First Name</strong>',
+                //description: 'Enter your <strong>First Name</strong>'
+            }]
+    }
+
+    const dataflowid_to_selection = function (result) {
+        let ret = []
+        result.forEach((elem) => {
+            if (elem["dataflow_id"].trim() != "") {
+                ret.push({ label: elem["dataflow_id"], value: elem["dataflow_id"] })
+            }
+        });
+
+        return ret;
+    }
+
+    Formio.createForm(document.getElementById('formio'), {
+        components: [
+            {
+                type: 'textfield',
+                key: 'main_title',
+                label: 'Main title',
+
+                input: true,
+                //tooltip: 'Enter your <strong>First Name</strong>',
+                //description: 'Enter your <strong>First Name</strong>'
+            },
+            {
+                type: 'select',
+                key: 'page_nav',
+                label: 'Page navigation',
+                defaultValue: 'all',
+                data: { values: [{ label: "All", value: "all" }, { label: "Hide", value: "hide" }] },
+                input: true
+            },
+            {
+                label: "Dataflows",
+                key: "dataflows",
+                type: "datagrid",
+                input: true,
+                //components: [dataflow_id],
+                layoutFixed: false,
+                tableView: false,
+                addAnotherPosition: "bottom",
+                components: dataflow_id,
+                modalEdit: true
+            },
+
+            //dashb_element,
+            {
+                label: "Row",
+                key: "row",
+                type: 'datagrid',
+                input: true,
+                components: [dashb_element]
+            }
+        ]
+    }).then(function (form) {
+
+        val = JSON.parse(document.getElementById("content").value);
+
+        form.submission = {
+            data: val
+        };
+        form.on('change', function () {
+            document.getElementById("content").value = JSON.stringify(form.submission["data"]);
+        })
+    })
+</script>
+{% endblock tail%}

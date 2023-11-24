@@ -13,7 +13,7 @@ from .extensions import db, flask_admin, login_manager
 #The models, import for flask admin
 from .models import Dashboard, Project, Splashpage, User
 #The models' views, for flask admin
-from .views import DashboardView, ProjectView, UserView, SplashView, ExtFileAdmin, ConfigEditorView
+from .views import DashboardView, ProjectView, UserView, SplashView, ExtFileAdmin
 from .app_settings import FILES_UPLOAD_PATH
 from .db_access import db_access
 import flask_login
@@ -57,7 +57,8 @@ class LogoutMenuLink(MenuLink):
         return flask_login.current_user.is_authenticated
 flask_admin.add_link(LogoutMenuLink(name="Logout", category="", url="/logout"))
 
-flask_admin.add_view(ConfigEditorView(name="Config editor", endpoint="configs"))
+#flask_admin.add_view(ConfigEditorView(name="Config editor", endpoint="configs"))
+
 flask_admin.add_view(SplashView(Splashpage, db.session))
 
 
