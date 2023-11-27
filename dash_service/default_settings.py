@@ -70,6 +70,8 @@ if "SQLALCHEMY_DATABASE_URI" in os.environ:
 else:
     SQLALCHEMY_DATABASE_URI = "sqlite:///pages.db"
 
+SQLALCHEMY_TRACK_MODIFICATIONS = False
+
 #Used by flask to sign the cookies should be kept stable during the lifecycle and across restarts
 if "FLASK_SECRET_KEY" in os.environ:
     SECRET_KEY = os.environ["FLASK_SECRET_KEY"]

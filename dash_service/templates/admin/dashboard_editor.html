@@ -22,20 +22,118 @@
 
 
 <script>
+
+    // Helpers
+    const dataflowid_to_selection = function (result) {
+        let ret = []
+        result.forEach((elem) => {
+            if (elem["dataflow_id"].trim() != "") {
+                ret.push({ label: elem["dataflow_id"], value: elem["dataflow_id"] })
+            }
+        });
+
+        return ret;
+    }
+    //Helpers end
+
+    const dash_block = [{
+        type: 'select',
+        key: 'type',
+        label: 'Block type',
+        data: {
+            values: [
+                {
+                    label: "Card",
+                    value: "card"
+                },
+                {
+                    label: "Map",
+                    value: "map"
+                },
+                {
+                    label: "Chart",
+                    value: "chart"
+                }
+            ]
+        },
+        input: true,
+        tableview: false,
+    },
+    {
+        "label": "Dataflow",
+        "optionsLabelPosition": "right",
+        "inline": true,
+        "tableView": false,
+        "key": "df_select",
+        "type": "radio",
+        "input": true,
+        //"dataSrc": "json",
+        "logic": [
+            {
+                "name": "dataflows_trigger",
+                "trigger": {
+                    "type": "javascript",
+                    "javascript": "return data.dataflows;"
+                },
+                "actions": [
+                    {
+                        "name": "radio_dataflows_set",
+                        "type": "customAction",
+                        "customAction": "component.values = dataflowid_to_selection(result)"
+                    }
+                ]
+            }
+        ],
+    },
+    {
+        type: 'textfield',
+        key: 'dq',
+        label: 'Data query',
+        input: true,
+        tableview: false,
+    },
+    {
+        "label": "Only recent observations",
+        "tableView": false,
+        "key": "lastnobservations",
+        "type": "checkbox",
+        "input": true
+    }]
+
     const dataflow_id = [{
         type: 'textfield',
         key: 'dataflow_id',
         label: 'Dataflow Id',
         placeholder: "AGENCY,ID,VERSION",
-        description: "Add the Dataflow's Agency, id, and version separated by a comma",
+        description: "Add the Dataflow's Agency, id, and version <strong>separated by a comma</strong>",
         input: true,
         tableview: false,
     }]
 
-    const dashb_element = {
+    const theme = [{
+        type: 'textfield',
+        key: 'theme_id',
+        label: 'Theme id',
+        input: true,
+        tableview: false,
+    }, {
+        type: 'textfield',
+        key: 'theme_name',
+        label: 'Theme name',
+        input: true,
+        tableview: false,
+    },
+    {
+        label: "Rows",
+        key: "ROWS",
+        type: 'datagrid',
+        input: true,
+        tableview: false,
+        components: dash_block
+    }]
+
+    const block_elem = {
         components: [
-
-
             {
                 "label": "Dataflow",
                 "optionsLabelPosition": "right",
@@ -62,17 +160,6 @@
                 ],
             },
 
-
-
-
-
-
-
-
-
-
-
-
             {
                 type: 'select',
                 key: 'type',
@@ -81,29 +168,6 @@
                 data: { values: [{ label: "Card", value: "card" }, { label: "Map", value: "map" }, { label: "Chart", value: "chart" }] },
                 input: true
             },
-
-            {
-                type: "panel",
-                title: 'Data',
-                label: 'Data query',
-                key: 'data',
-                components: [
-                    {
-                        type: 'textfield',
-                        key: 'dq',
-                        label: 'Data query',
-                        input: true,
-                        tableview: true,
-                    },
-                    {
-                        type: 'checkbox',
-                        key: 'lastnobservations',
-                        label: 'Only most recent values',
-                        input: true,
-                        tableview: true,
-                    }]
-            },
-
             {
                 type: 'textfield',
                 key: 'label',
@@ -111,20 +175,26 @@
 
                 input: true,
                 //tooltip: 'Enter your <strong>First Name</strong>',
-                //description: 'Enter your <strong>First Name</strong>'
+                description: 'Leave empty to pull the label from the data'
+            },
+            {
+                type: 'textfield',
+                key: 'dq',
+                label: 'Data query',
+                input: true,
+                tableview: true,
+            },
+            {
+                type: 'checkbox',
+                key: 'lastnobservations',
+                label: 'Only most recent values',
+                input: true,
+                tableview: true,
+
             }]
     }
 
-    const dataflowid_to_selection = function (result) {
-        let ret = []
-        result.forEach((elem) => {
-            if (elem["dataflow_id"].trim() != "") {
-                ret.push({ label: elem["dataflow_id"], value: elem["dataflow_id"] })
-            }
-        });
 
-        return ret;
-    }
 
     Formio.createForm(document.getElementById('formio'), {
         components: [
@@ -158,14 +228,22 @@
                 modalEdit: true
             },
 
-            //dashb_element,
+            //Themes
             {
-                label: "Row",
-                key: "row",
-                type: 'datagrid',
+                label: "Themes",
+                key: "THEMES",
+                type: 'editgrid',
                 input: true,
-                components: [dashb_element]
+                components: theme
             }
+            //dashb_element,
+            // {
+            //     label: "Rows",
+            //     key: "ROWS",
+            //     type: 'datagrid',
+            //     input: true,
+            //     components: [block_elem]
+            // }
         ]
     }).then(function (form) {
 
