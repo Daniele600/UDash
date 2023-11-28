@@ -53,7 +53,7 @@
     const dataflow_id = [{
         type: 'textfield',
         key: 'agency',
-        label: 'Dataflow Agency',
+        label: 'Agency',
         placeholder: "AGENCY",
         input: true,
         labelPosition: LABEL_POSITION,
@@ -62,7 +62,7 @@
     {
         type: 'textfield',
         key: 'id',
-        label: 'Dataflow id',
+        label: 'Id',
         placeholder: "ID",
         input: true,
         labelPosition: LABEL_POSITION,
@@ -70,7 +70,7 @@
     }, {
         type: 'textfield',
         key: 'version',
-        label: 'Dataflow version',
+        label: 'Version',
         placeholder: "VERSION",
         input: true,
         labelPosition: LABEL_POSITION,
@@ -295,38 +295,69 @@
                 input: true
             },
             {
+                type: "panel",
+                theme: "primary",
+                key: "pnl_dataflows",
                 label: "Dataflows",
-                key: "dataflows",
-                type: "editgrid",
-                input: true,
-                //components: [dataflow_id],
-                layoutFixed: false,
+                title: "Dataflows",
+                collapsible: false,
                 tableView: false,
-                addAnotherPosition: "bottom",
-                components: dataflow_id,
-                //modalEdit: true
+                components: [{
+                    label: "",
+                    key: "dataflows",
+                    type: "editgrid",
+                    input: true,
+                    layoutFixed: false,
+                    tableView: false,
+                    addAnotherPosition: "bottom",
+                    components: dataflow_id,
+                }]
             },
 
-            //Themes
             {
+                type: "panel",
+                theme: "primary",
+                key: "pnl_themes",
                 label: "Themes",
-                key: "themes",
-                type: 'editgrid',
-                input: true,
-                layoutFixed: false,
+                title: "Themes",
+                collapsible: false,
                 tableView: false,
-                addAnotherPosition: "bottom",
-                reorder: true,
-                //modalEdit: true,
-                components: theme
+                components: [{
+                    label: "",
+                    key: "themes",
+                    type: 'editgrid',
+                    input: true,
+                    layoutFixed: false,
+                    tableView: false,
+                    addAnotherPosition: "bottom",
+                    reorder: true,
+                    //modalEdit: true,
+                    components: theme
+                }]
             },
+
             {
-                label: "Rows",
-                key: "ROWS",
-                type: 'editgrid',
-                input: true,
-                components: [block_elem]
-            }
+                type: "panel",
+                theme: "primary",
+                key: "pnl_rows",
+                label: "Elements",
+                title: "Elements",
+                collapsible: false,
+                tableView: false,
+                components: [{
+                    label: "",
+                    key: "ROWS",
+                    type: 'editgrid',
+                    input: true,
+                    components: [block_elem]
+                }]
+            },
+
+
+
+
+
+
 
 
         ]
