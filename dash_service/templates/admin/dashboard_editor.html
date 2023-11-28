@@ -27,155 +27,190 @@
     const dataflowid_to_selection = function (result) {
         let ret = []
         result.forEach((elem) => {
-            if (elem["dataflow_id"].trim() != "") {
-                ret.push({ label: elem["dataflow_id"], value: elem["dataflow_id"] })
+            if (elem["agency"].trim() != "" && elem["id"].trim() != "" && elem["version"].trim() != "") {
+                let df_id = elem["agency"] + "," + elem["id"] + "," + elem["version"];
+                ret.push({ label: df_id, value: df_id })
             }
+        });
+
+        return ret;
+    }
+
+    const themes_to_selection = function (result) {
+        let ret = []
+        result.forEach((elem) => {
+            ret.push({ label: elem["theme_name"], value: elem["theme_id"] })
         });
 
         return ret;
     }
     //Helpers end
 
-    const dash_block = [{
-        type: 'select',
-        key: 'type',
-        label: 'Block type',
-        data: {
-            values: [
-                {
-                    label: "Card",
-                    value: "card"
-                },
-                {
-                    label: "Map",
-                    value: "map"
-                },
-                {
-                    label: "Chart",
-                    value: "chart"
-                }
-            ]
-        },
-        input: true,
-        tableview: false,
-    },
-    {
-        "label": "Dataflow",
-        "optionsLabelPosition": "right",
-        "inline": true,
-        "tableView": false,
-        "key": "df_select",
-        "type": "radio",
-        "input": true,
-        //"dataSrc": "json",
-        "logic": [
-            {
-                "name": "dataflows_trigger",
-                "trigger": {
-                    "type": "javascript",
-                    "javascript": "return data.dataflows;"
-                },
-                "actions": [
-                    {
-                        "name": "radio_dataflows_set",
-                        "type": "customAction",
-                        "customAction": "component.values = dataflowid_to_selection(result)"
-                    }
-                ]
-            }
-        ],
-    },
-    {
-        type: 'textfield',
-        key: 'dq',
-        label: 'Data query',
-        input: true,
-        tableview: false,
-    },
-    {
-        "label": "Only recent observations",
-        "tableView": false,
-        "key": "lastnobservations",
-        "type": "checkbox",
-        "input": true
-    }]
-
+    //UI settings:
+    const LABEL_POSITION = "left-left";
+    const LABEl_WIDTH = 20;
+    //UI settings end
     const dataflow_id = [{
         type: 'textfield',
-        key: 'dataflow_id',
-        label: 'Dataflow Id',
-        placeholder: "AGENCY,ID,VERSION",
-        description: "Add the Dataflow's Agency, id, and version <strong>separated by a comma</strong>",
+        key: 'agency',
+        label: 'Dataflow Agency',
+        placeholder: "AGENCY",
         input: true,
-        tableview: false,
+        labelPosition: LABEL_POSITION,
+        labelWidth: LABEl_WIDTH,
+    },
+    {
+        type: 'textfield',
+        key: 'id',
+        label: 'Dataflow id',
+        placeholder: "ID",
+        input: true,
+        labelPosition: LABEL_POSITION,
+        labelWidth: LABEl_WIDTH,
+    }, {
+        type: 'textfield',
+        key: 'version',
+        label: 'Dataflow version',
+        placeholder: "VERSION",
+        input: true,
+        labelPosition: LABEL_POSITION,
+        labelWidth: LABEl_WIDTH,
+        //tableview: false,
     }]
 
     const theme = [{
+        "label": "Position",
+        "applyMaskOn": "change",
+        "mask": false,
+        "tableView": true,
+        "delimiter": false,
+        "requireDecimal": false,
+        "inputFormat": "plain",
+        "truncateMultipleSpaces": false,
+        "key": "theme_pos",
+        "type": "number",
+        "input": true,
+        //"decimalLimit": 0,
+        "defaultValue": 1,
+        labelPosition: LABEL_POSITION,
+        labelWidth: LABEl_WIDTH,
+    }, {
         type: 'textfield',
         key: 'theme_id',
         label: 'Theme id',
         input: true,
         tableview: false,
+        labelPosition: LABEL_POSITION,
+        labelWidth: LABEl_WIDTH,
     }, {
         type: 'textfield',
         key: 'theme_name',
         label: 'Theme name',
         input: true,
         tableview: false,
-    },
-    {
-        label: "Rows",
-        key: "ROWS",
-        type: 'datagrid',
-        input: true,
-        tableview: false,
-        components: dash_block
-    }]
+        labelPosition: LABEL_POSITION,
+        labelWidth: LABEl_WIDTH,
+    }
+    ]
+
 
     const block_elem = {
         components: [
             {
-                "label": "Dataflow",
-                "optionsLabelPosition": "right",
-                "inline": true,
-                "tableView": false,
-                "key": "dataflow",
-                "type": "radio",
-                "input": true,
-                "logic": [
+                label: "Theme",
+                widget: "choicesjs",
+                tableView: true,
+                key: "theme",
+                type: "select",
+                input: true,
+                logic: [
                     {
-                        "name": "logic_radio_upd_trigger",
-                        "trigger": {
-                            "type": "javascript",
-                            "javascript": "return data.dataflows;"
+                        name: "logic_theme_upd_trigger",
+                        trigger: {
+                            type: "javascript",
+                            javascript: "return data.themes;"
                         },
-                        "actions": [
+                        actions: [
                             {
-                                "name": "action_set_dataflow_radio",
-                                "type": "customAction",
-                                "customAction": "component.values = dataflowid_to_selection(result)"
+                                name: "action_set_themes_select",
+                                type: "customAction",
+                                customAction: "component.data.values = themes_to_selection(result)"
                             }
                         ]
                     }
                 ],
+                labelPosition: LABEL_POSITION,
+                labelWidth: LABEl_WIDTH,
+            },
+            {
+                "label": "Row",
+                "applyMaskOn": "change",
+                "mask": false,
+                "tableView": true,
+                "delimiter": false,
+                "requireDecimal": false,
+                "inputFormat": "plain",
+                "truncateMultipleSpaces": false,
+                "key": "element_row",
+                "type": "number",
+                "input": true,
+                "defaultValue": 1,
+                labelPosition: LABEL_POSITION,
+                labelWidth: LABEl_WIDTH,
+            },
+            {
+                "label": "Column",
+                "applyMaskOn": "change",
+                "mask": false,
+                "tableView": true,
+                "delimiter": false,
+                "requireDecimal": false,
+                "inputFormat": "plain",
+                "truncateMultipleSpaces": false,
+                "key": "element_col",
+                "type": "number",
+                "input": true,
+                "defaultValue": 1,
+                labelPosition: LABEL_POSITION,
+                labelWidth: LABEl_WIDTH,
+            },
+            {
+                label: "Dataflow",
+                optionsLabelPosition: "right",
+                inline: true,
+                tableView: false,
+                key: "dataflow",
+                type: "radio",
+                input: true,
+                logic: [
+                    {
+                        name: "logic_radio_upd_trigger",
+                        trigger: {
+                            type: "javascript",
+                            javascript: "return data.dataflows;"
+                        },
+                        actions: [
+                            {
+                                name: "action_set_dataflow_radio",
+                                type: "customAction",
+                                customAction: "component.values = dataflowid_to_selection(result)"
+                            }
+                        ]
+                    }
+                ],
+                labelPosition: LABEL_POSITION,
+                labelWidth: LABEl_WIDTH,
             },
 
             {
                 type: 'select',
-                key: 'type',
+                key: 'element_type',
                 label: 'Element type',
                 defaultValue: 'card',
                 data: { values: [{ label: "Card", value: "card" }, { label: "Map", value: "map" }, { label: "Chart", value: "chart" }] },
-                input: true
-            },
-            {
-                type: 'textfield',
-                key: 'label',
-                label: 'Label',
-
                 input: true,
-                //tooltip: 'Enter your <strong>First Name</strong>',
-                description: 'Leave empty to pull the label from the data'
+                labelPosition: LABEL_POSITION,
+                labelWidth: LABEl_WIDTH,
             },
             {
                 type: 'textfield',
@@ -183,6 +218,8 @@
                 label: 'Data query',
                 input: true,
                 tableview: true,
+                labelPosition: LABEL_POSITION,
+                labelWidth: LABEl_WIDTH,
             },
             {
                 type: 'checkbox',
@@ -190,8 +227,50 @@
                 label: 'Only most recent values',
                 input: true,
                 tableview: true,
-
-            }]
+                logic: [
+                    {
+                        name: "card_chart_logic",
+                        trigger: {
+                            type: "simple",
+                            simple: {
+                                show: true,
+                                when: "element_type",
+                                eq: "card"
+                            }
+                        },
+                        actions: [
+                            {
+                                name: "card_chart_action_disable",
+                                type: "property",
+                                property: {
+                                    label: "Disabled",
+                                    value: "disabled",
+                                    type: "boolean"
+                                },
+                                state: true
+                            },
+                            {
+                                name: "card_chart_action_ubcheck",
+                                type: "value",
+                                value: "value = false"
+                            }
+                        ]
+                    }
+                ],
+                labelPosition: LABEL_POSITION,
+                labelWidth: LABEl_WIDTH,
+            },
+            {
+                type: 'textfield',
+                key: 'label',
+                label: 'Label',
+                tableView: false,
+                input: true,
+                //tooltip: 'Enter your <strong>First Name</strong>',
+                description: 'Leave empty to pull the label from the data',
+                labelPosition: LABEL_POSITION,
+                labelWidth: LABEl_WIDTH,
+            },]
     }
 
 
@@ -218,32 +297,38 @@
             {
                 label: "Dataflows",
                 key: "dataflows",
-                type: "datagrid",
+                type: "editgrid",
                 input: true,
                 //components: [dataflow_id],
                 layoutFixed: false,
                 tableView: false,
                 addAnotherPosition: "bottom",
                 components: dataflow_id,
-                modalEdit: true
+                //modalEdit: true
             },
 
             //Themes
             {
                 label: "Themes",
-                key: "THEMES",
+                key: "themes",
                 type: 'editgrid',
                 input: true,
+                layoutFixed: false,
+                tableView: false,
+                addAnotherPosition: "bottom",
+                reorder: true,
+                //modalEdit: true,
                 components: theme
+            },
+            {
+                label: "Rows",
+                key: "ROWS",
+                type: 'editgrid',
+                input: true,
+                components: [block_elem]
             }
-            //dashb_element,
-            // {
-            //     label: "Rows",
-            //     key: "ROWS",
-            //     type: 'datagrid',
-            //     input: true,
-            //     components: [block_elem]
-            // }
+
+
         ]
     }).then(function (form) {
 
