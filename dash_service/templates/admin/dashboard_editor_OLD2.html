@@ -163,119 +163,41 @@
         //tableview: false,
     }]
 
-
     const theme = [{
-        key: "theme_tbl",
-        type: "table",
-        numRows: 5,
-        numCols: 2,
-        input: false,
-        tableView: false,
-        rows: [[{
-            components: [{
-                type: 'textfield',
-                key: 'THEME_1',
-                label: 'Theme 1 name',
-                input: true,
-                tableview: false,
-                labelPosition: LABEL_POSITION,
-                labelWidth: LABEl_WIDTH,
-            }]
-        }, {
-            components: [{
-                type: 'checkbox',
-                key: 'THEME_CHK_1',
-                label: '',
-                input: true,
-                tableview: false,
-                labelPosition: LABEL_POSITION,
-                labelWidth: LABEl_WIDTH,
-                defaultValue: true,
-                disabled: true
-            }]
-        }], [{
-            components: [{
-                type: 'textfield',
-                key: 'THEME_2',
-                label: 'Theme 2 name',
-                input: true,
-                tableview: false,
-                labelPosition: LABEL_POSITION,
-                labelWidth: LABEl_WIDTH,
-            }]
-        }, {
-            components: [{
-                type: 'checkbox',
-                key: 'THEME_CHK_2',
-                label: '',
-                input: true,
-                tableview: false,
-                labelPosition: LABEL_POSITION,
-                labelWidth: LABEl_WIDTH,
-            }]
-        }],
-        [{
-            components: [{
-                type: 'textfield',
-                key: 'THEME_3',
-                label: 'Theme 3 name',
-                input: true,
-                tableview: false,
-                labelPosition: LABEL_POSITION,
-                labelWidth: LABEl_WIDTH,
-            }]
-        }, {
-            components: [{
-                type: 'checkbox',
-                key: 'THEME_CHK_3',
-                label: '',
-                input: true,
-                tableview: false,
-                labelPosition: LABEL_POSITION,
-                labelWidth: LABEl_WIDTH,
-            }]
-        }], [{
-            components: [{
-                type: 'textfield',
-                key: 'THEME_4',
-                label: 'Theme 4 name',
-                input: true,
-                tableview: false,
-                labelPosition: LABEL_POSITION,
-                labelWidth: LABEl_WIDTH,
-            }]
-        }, {
-            components: [{
-                type: 'checkbox',
-                key: 'THEME_CHK_4',
-                label: '',
-                input: true,
-                tableview: false,
-                labelPosition: LABEL_POSITION,
-                labelWidth: LABEl_WIDTH,
-            }]
-        }], [{
-            components: [{
-                type: 'textfield',
-                key: 'THEME_5',
-                label: 'Theme 5 name',
-                input: true,
-                tableview: false,
-                labelPosition: LABEL_POSITION,
-                labelWidth: LABEl_WIDTH,
-            }]
-        }, {
-            components: [{
-                type: 'checkbox',
-                key: 'THEME_CHK_5',
-                label: '',
-                input: true,
-                tableview: false,
-                labelPosition: LABEL_POSITION,
-                labelWidth: LABEl_WIDTH,
-            }]
-        }]]
-    }]
+        "label": "Position",
+        "applyMaskOn": "change",
+        "mask": false,
+        "tableView": true,
+        "delimiter": false,
+        "requireDecimal": false,
+        "inputFormat": "plain",
+        "truncateMultipleSpaces": false,
+        "key": "theme_pos",
+        "type": "number",
+        "input": true,
+        //"decimalLimit": 0,
+        "defaultValue": 1,
+        labelPosition: LABEL_POSITION,
+        labelWidth: LABEl_WIDTH,
+    }, {
+        type: 'textfield',
+        key: 'theme_id',
+        label: 'Theme id',
+        input: true,
+        tableview: false,
+        labelPosition: LABEL_POSITION,
+        labelWidth: LABEl_WIDTH,
+    }, {
+        type: 'textfield',
+        key: 'theme_name',
+        label: 'Theme name',
+        input: true,
+        tableview: false,
+        labelPosition: LABEL_POSITION,
+        labelWidth: LABEl_WIDTH,
+    }
+    ]
+
 
     const block_elem = {
         components: [
@@ -409,7 +331,7 @@
                 key: "pnl_dataflows",
                 label: "Dataflows",
                 title: "Dataflows",
-                collapsible: true,
+                collapsible: false,
                 tableView: false,
                 components: [{
                     label: "",
@@ -429,46 +351,41 @@
                 key: "pnl_themes",
                 label: "Themes",
                 title: "Themes",
-                collapsible: true,
-                tableView: false,
-                components: theme
-            },
-
-            //Elements in themes
-            {
-                type: "panel",
-                theme: "primary",
-                key: "pnl_theme_1",
-                title: "Theme 1",
                 collapsible: false,
                 tableView: false,
+                components: [{
+                    label: "",
+                    key: "themes",
+                    type: 'datagrid',
+                    input: true,
+                    //layoutFixed: false,
+                    tableView: false,
+                    addAnotherPosition: "bottom",
+                    //disableAddingRemovingRows:true,
+                    reorder: true,
+                    
+                    //modalEdit: true,
+                    components: theme
+                }]
             },
-            {
-                type: "panel",
-                theme: "primary",
-                key: "pnl_theme_2",
-                title: "Theme 2",
-                collapsible: false,
-                tableView: false,
-            }
 
             //Dashboard Elements
-            // {
-            //     type: "panel",
-            //     theme: "primary",
-            //     key: "pnl_dashb_elements",
-            //     label: "Dashboard elements",
-            //     title: "Dashboard elements",
-            //     collapsible: false,
-            //     tableView: false,
-            //     components: [{
-            //         type: 'editgrid',
-            //         input: true,
-            //         label: "",
-            //         key: "elements",
-            //         components: [block_elem]
-            //     }]
-            // }
+            {
+                type: "panel",
+                theme: "primary",
+                key: "pnl_dashb_elements",
+                label: "Dashboard elements",
+                title: "Dashboard elements",
+                collapsible: false,
+                tableView: false,
+                components: [{
+                    type: 'editgrid',
+                    input: true,
+                    label: "",
+                    key: "elements",
+                    components: [block_elem]
+                }]
+            }
         ]
     }).then(function (form) {
 
