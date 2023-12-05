@@ -163,8 +163,7 @@
         //tableview: false,
     }]
 
-    const get_theme = function (theme_num, chk_disabled) {
-
+    const get_theme = function (theme_num, chk_disabled, chk_checked) {
         return {
             key: "cols_theme",
             type: "columns",
@@ -187,8 +186,8 @@
                                     type: "simple",
                                     simple: {
                                         show: true,
-                                        when: "theme_active_chk_" + theme_num,
-                                        eq: "true"
+                                        when: "is_theme_active_" + theme_num,
+                                        eq: "false"
                                     }
                                 },
                                 actions: [
@@ -217,11 +216,13 @@
                 },
                 {
                     components: [{
-                        key: "theme_active_chk_" + theme_num,
+                        key: "is_theme_active_" + theme_num,
                         type: "checkbox",
+                        label: "Is active",
                         input: true,
                         tableView: true,
-                        disabled: chk_disabled
+                        disabled: chk_disabled,
+                        defaultValue: chk_checked
                     }],
                     width: 2,
                     offset: 0,
@@ -234,120 +235,9 @@
         }
     }
 
-    const themes = [get_theme(1, true), get_theme(2, false),]
+    const themes = [get_theme(1, true, true), get_theme(2, false, false), get_theme(3, false, false)]
 
-    // const themes = [{
-    //     key: "theme_tbl",
-    //     type: "table",
-    //     numRows: 5,
-    //     numCols: 2,
-    //     input: false,
-    //     tableView: false,
-    //     rows: [[{
-    //         components: [{
-    //             type: 'textfield',
-    //             key: 'THEME_1',
-    //             label: 'Theme 1 name',
-    //             input: true,
-    //             tableview: false,
-    //             labelPosition: LABEL_POSITION,
-    //             labelWidth: LABEl_WIDTH,
-    //         }]
-    //     }, {
-    //         components: [{
-    //             type: 'checkbox',
-    //             key: 'THEME_CHK_1',
-    //             label: '',
-    //             input: true,
-    //             tableview: false,
-    //             labelPosition: LABEL_POSITION,
-    //             labelWidth: LABEl_WIDTH,
-    //             defaultValue: true,
-    //             disabled: true
-    //         }]
-    //     }], [{
-    //         components: [{
-    //             type: 'textfield',
-    //             key: 'THEME_2',
-    //             label: 'Theme 2 name',
-    //             input: true,
-    //             tableview: false,
-    //             labelPosition: LABEL_POSITION,
-    //             labelWidth: LABEl_WIDTH,
-    //         }]
-    //     }, {
-    //         components: [{
-    //             type: 'checkbox',
-    //             key: 'THEME_CHK_2',
-    //             label: '',
-    //             input: true,
-    //             tableview: false,
-    //             labelPosition: LABEL_POSITION,
-    //             labelWidth: LABEl_WIDTH,
-    //         }]
-    //     }],
-    //     [{
-    //         components: [{
-    //             type: 'textfield',
-    //             key: 'THEME_3',
-    //             label: 'Theme 3 name',
-    //             input: true,
-    //             tableview: false,
-    //             labelPosition: LABEL_POSITION,
-    //             labelWidth: LABEl_WIDTH,
-    //         }]
-    //     }, {
-    //         components: [{
-    //             type: 'checkbox',
-    //             key: 'THEME_CHK_3',
-    //             label: '',
-    //             input: true,
-    //             tableview: false,
-    //             labelPosition: LABEL_POSITION,
-    //             labelWidth: LABEl_WIDTH,
-    //         }]
-    //     }], [{
-    //         components: [{
-    //             type: 'textfield',
-    //             key: 'THEME_4',
-    //             label: 'Theme 4 name',
-    //             input: true,
-    //             tableview: false,
-    //             labelPosition: LABEL_POSITION,
-    //             labelWidth: LABEl_WIDTH,
-    //         }]
-    //     }, {
-    //         components: [{
-    //             type: 'checkbox',
-    //             key: 'THEME_CHK_4',
-    //             label: '',
-    //             input: true,
-    //             tableview: false,
-    //             labelPosition: LABEL_POSITION,
-    //             labelWidth: LABEl_WIDTH,
-    //         }]
-    //     }], [{
-    //         components: [{
-    //             type: 'textfield',
-    //             key: 'THEME_5',
-    //             label: 'Theme 5 name',
-    //             input: true,
-    //             tableview: false,
-    //             labelPosition: LABEL_POSITION,
-    //             labelWidth: LABEl_WIDTH,
-    //         }]
-    //     }, {
-    //         components: [{
-    //             type: 'checkbox',
-    //             key: 'THEME_CHK_5',
-    //             label: '',
-    //             input: true,
-    //             tableview: false,
-    //             labelPosition: LABEL_POSITION,
-    //             labelWidth: LABEl_WIDTH,
-    //         }]
-    //     }]]
-    // }]
+
 
     const block_elem = {
         components: [
@@ -427,6 +317,46 @@
         ]
     }
 
+    const get_theme_panel = function (theme_num, collapsed) {
+        return {
+            type: "panel",
+            theme: "primary",
+            key: "pnl_theme_" + theme_num,
+            title: "Theme " + theme_num,
+            collapsible: true,
+            collapsed: collapsed,
+            tableView: false,
+            components: [block_elem],
+
+            logic: [
+                {
+                    name: "logic_theme_pane_show_hide",
+                    trigger: {
+                        type: "simple",
+                        simple: {
+                            show: true,
+                            when: "is_theme_active_" + theme_num,
+                            eq: "false"
+                        }
+                    },
+                    actions: [
+                        {
+                            name: "action_theme_pane_show_hide",
+                            type: "property",
+                            property: {
+                                label: "Hidden",
+                                value: "hidden",
+                                type: "boolean"
+                            },
+                            "state": true
+                        }
+                    ]
+                }
+            ]
+
+        }
+    }
+
 
 
     Formio.createForm(document.getElementById('formio'), {
@@ -481,42 +411,11 @@
             },
 
             //Elements in themes
-            {
-                type: "panel",
-                theme: "primary",
-                key: "pnl_theme_1",
-                title: "Theme 1",
-                collapsible: true,
-                tableView: false,
-                components: [block_elem]
-            },
-            {
-                type: "panel",
-                theme: "primary",
-                key: "pnl_theme_2",
-                title: "Theme 2",
-                collapsible: true,
-                tableView: false,
-                components: [block_elem]
-            }
+            get_theme_panel(1, false),
+            get_theme_panel(2, true),
+            get_theme_panel(3, true),
 
-            //Dashboard Elements
-            // {
-            //     type: "panel",
-            //     theme: "primary",
-            //     key: "pnl_dashb_elements",
-            //     label: "Dashboard elements",
-            //     title: "Dashboard elements",
-            //     collapsible: false,
-            //     tableView: false,
-            //     components: [{
-            //         type: 'editgrid',
-            //         input: true,
-            //         label: "",
-            //         key: "elements",
-            //         components: [block_elem]
-            //     }]
-            // }
+
         ]
     }).then(function (form) {
 
