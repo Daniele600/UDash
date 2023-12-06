@@ -53,88 +53,120 @@
     const LABEl_WIDTH = 20;
     //UI settings end
 
-
-    const chart_options = {
-        "label": "",
-        "key": "chart_options",
-        "type": "fieldset",
-        "input": false,
-        "tableView": false,
-        "components": [{
-            type: "select",
-            label: "Chart type",
-            optionsLabelPosition: "right",
-            inline: true,
-            tableView: false,
-            key: "chatr_type",
-            input: true,
-            data: { values: [{ label: "Bar chart", value: "bar" }, { label: "Line chart", value: "line" }] },
-            labelPosition: LABEL_POSITION,
-            labelWidth: LABEl_WIDTH,
-        },
-        {
-            type: "textfield",
-            label: "X axis",
-            inline: true,
-            tableView: false,
-            key: "x",
-            input: true,
-            labelPosition: LABEL_POSITION,
-            labelWidth: LABEl_WIDTH,
-        },
-        {
-            type: "textfield",
-            label: "X axis",
-            inline: true,
-            tableView: false,
-            key: "y",
-            input: true,
-            labelPosition: LABEL_POSITION,
-            labelWidth: LABEl_WIDTH,
-        }]
+    const get_hide_field_when_chart_tipe_logic = function () {
+        return [
+            {
+                name: "logic_ch_type",
+                trigger: {
+                    type: "simple",
+                    simple: {
+                        show: true,
+                        when: "element_type",
+                        eq: "card"
+                    }
+                },
+                actions: [{
+                    name: "action_ch_type",
+                    type: "property",
+                    property: {
+                        label: "Hidden",
+                        value: "hidden",
+                        type: "boolean"
+                    },
+                    state: true
+                }]
+            }
+        ]
     }
 
-    const dataquery = [
-        {
-            label: "Dataflow",
-            optionsLabelPosition: "right",
-            inline: true,
-            tableView: true,
-            key: "dataflow",
-            type: "select",
-            input: true,
-            logic: [
-                {
-                    name: "logic_dataflow_select_upd",
-                    trigger: {
-                        type: "javascript",
-                        javascript: "return data.dataflows;"
-                    },
-                    actions: [
-                        {
-                            name: "action_dataflow_select_upd",
-                            type: "customAction",
-                            customAction: "component.data.values = dataflowid_to_selection(result)"
-                        }
-                    ]
-                }
-            ],
-            labelPosition: LABEL_POSITION,
-            labelWidth: LABEl_WIDTH,
+
+    const get_chart_options = function () {
+        return {
+            "label": "",
+            "key": "chart_options",
+            "type": "fieldset",
+            "input": false,
+            "tableView": false,
+            "components": [{
+                type: "radio",
+                label: "Chart type",
+                optionsLabelPosition: "right",
+                inline: true,
+                tableView: false,
+                key: "chart_type",
+                input: true,
+                values: [{ label: "Bar", value: "bar" }, { label: "Line", value: "line" }],
+                labelPosition: LABEL_POSITION,
+                labelWidth: LABEl_WIDTH,
+                logic: get_hide_field_when_chart_tipe_logic()
+            },
+            {
+                type: "textfield",
+                label: "X axis",
+                inline: true,
+                tableView: false,
+                key: "x",
+                input: true,
+                labelPosition: LABEL_POSITION,
+                labelWidth: LABEl_WIDTH,
+                logic: get_hide_field_when_chart_tipe_logic()
+            },
+            {
+                type: "textfield",
+                label: "Y axis",
+                inline: true,
+                tableView: false,
+                key: "y",
+                input: true,
+                labelPosition: LABEL_POSITION,
+                labelWidth: LABEl_WIDTH,
+                logic: get_hide_field_when_chart_tipe_logic()
+            }]
         }
-        ,
-        {
+    }
 
-            type: 'textfield',
-            key: 'dq',
-            label: 'Data query',
-            input: true,
-            tableview: true,
-            labelPosition: LABEL_POSITION,
-            labelWidth: LABEl_WIDTH,
+    const get_dataquery = function () {
+        return [
+            {
+                label: "Dataflow",
+                optionsLabelPosition: "right",
+                inline: true,
+                tableView: true,
+                key: "dataflow",
+                type: "select",
+                input: true,
+                logic: [
+                    {
+                        name: "logic_dataflow_select_upd",
+                        trigger: {
+                            type: "javascript",
+                            javascript: "return data.dataflows;"
+                        },
+                        actions: [
+                            {
+                                name: "action_dataflow_select_upd",
+                                type: "customAction",
+                                customAction: "component.data.values = dataflowid_to_selection(result)"
+                            }
+                        ]
+                    }
+                ],
+                labelPosition: LABEL_POSITION,
+                labelWidth: LABEl_WIDTH,
+            }
+            ,
+            {
 
-        }]
+                type: 'textfield',
+                key: "dq",
+                label: 'Data query',
+                input: true,
+                tableview: true,
+                labelPosition: LABEL_POSITION,
+                labelWidth: LABEl_WIDTH,
 
+            }]
+    }
     const dataflow_id = [{
         type: 'textfield',
         key: 'agency',
@@ -238,83 +270,85 @@
     const themes = [get_theme(1, true, true), get_theme(2, false, false), get_theme(3, false, false)]
 
 
-
-    const block_elem = {
-        components: [
-            {
-                "label": "Row",
-                "applyMaskOn": "change",
-                "mask": false,
-                "tableView": true,
-                "delimiter": false,
-                "requireDecimal": false,
-                "inputFormat": "plain",
-                "truncateMultipleSpaces": false,
-                "key": "element_row",
-                "type": "number",
-                "input": true,
-                "defaultValue": 1,
-                labelPosition: LABEL_POSITION,
-                labelWidth: LABEl_WIDTH,
-            },
-            {
-                "label": "Column",
-                "applyMaskOn": "change",
-                "mask": false,
-                "tableView": true,
-                "delimiter": false,
-                "requireDecimal": false,
-                "inputFormat": "plain",
-                "truncateMultipleSpaces": false,
-                "key": "element_col",
-                "type": "number",
-                "input": true,
-                "defaultValue": 1,
-                labelPosition: LABEL_POSITION,
-                labelWidth: LABEl_WIDTH,
-            },
-            {
-                type: 'select',
-                key: 'element_type',
-                label: 'Element type',
-                defaultValue: 'card',
-                data: { values: [{ label: "Card", value: "card" }, { label: "Map", value: "map" }, { label: "Chart", value: "chart" }] },
-                input: true,
-                labelPosition: LABEL_POSITION,
-                labelWidth: LABEl_WIDTH,
-            },
-            {
-                type: 'textfield',
-                key: 'label',
-                label: 'Label',
-                tableView: false,
-                input: true,
-                //tooltip: 'Enter your <strong>First Name</strong>',
-                placeholder: 'Leave empty to pull the label from the data',
-                labelPosition: LABEL_POSITION,
-                labelWidth: LABEl_WIDTH,
-            },
-            chart_options,
-            {
-                type: "panel",
-                key: "pnl_dataquery",
-                input: false,
-                tableview: false,
-                hideLabel: true,
-
-                components: [{
-                    type: "datagrid",
-                    key: "dataquery",
-                    label: "Data",
-
-                    //displayAsTable: true,
+    const get_block_elem = function () {
+        return {
+            components: [
+                {
+                    "label": "Row",
+                    "applyMaskOn": "change",
+                    "mask": false,
+                    "tableView": true,
+                    "delimiter": false,
+                    "requireDecimal": false,
+                    "inputFormat": "plain",
+                    "truncateMultipleSpaces": false,
+                    "key": "element_row",
+                    "type": "number",
+                    "input": true,
+                    "defaultValue": 1,
+                    labelPosition: LABEL_POSITION,
+                    labelWidth: LABEl_WIDTH,
+                },
+                {
+                    "label": "Column",
+                    "applyMaskOn": "change",
+                    "mask": false,
+                    "tableView": true,
+                    "delimiter": false,
+                    "requireDecimal": false,
+                    "inputFormat": "plain",
+                    "truncateMultipleSpaces": false,
+                    "key": "element_col",
+                    "type": "number",
+                    "input": true,
+                    "defaultValue": 1,
+                    labelPosition: LABEL_POSITION,
+                    labelWidth: LABEl_WIDTH,
+                },
+                {
+                    type: 'radio',
+                    key: "element_type",
+                    label: 'Element type',
+                    defaultValue: 'card',
+                    values: [{ label: "Card", value: "card" }, { label: "Map", value: "map" }, { label: "Chart", value: "chart" }],
+                    input: true,
+                    inline: true,
+                    labelPosition: LABEL_POSITION,
+                    labelWidth: LABEl_WIDTH,
+                },
+                {
+                    type: 'textfield',
+                    key: "label",
+                    label: 'Label',
                     tableView: false,
-                    //disableAddingRemovingRows: true,
-                    components: dataquery
-                }]
-                //components: [dataquery]
-            },
-        ]
+                    input: true,
+                    //tooltip: 'Enter your <strong>First Name</strong>',
+                    placeholder: 'Leave empty to pull the label from the data',
+                    labelPosition: LABEL_POSITION,
+                    labelWidth: LABEl_WIDTH,
+                },
+                get_chart_options(),
+                {
+                    type: "panel",
+                    key: "pnl_dataquery",
+                    input: false,
+                    tableview: false,
+                    hideLabel: true,
+
+                    components: [{
+                        type: "datagrid",
+                        key: "dataquery",
+                        label: "Data",
+
+                        //displayAsTable: true,
+                        tableView: false,
+                        //disableAddingRemovingRows: true,
+                        components: get_dataquery()
+                    }]
+                    //components: [dataquery]
+                },
+            ]
+        }
     }
 
     const get_theme_panel = function (theme_num, collapsed) {
@@ -326,7 +360,20 @@
             collapsible: true,
             collapsed: collapsed,
             tableView: false,
-            components: [block_elem],
+            // components: [block_elem],
+            components: [{
+                label: "Components",
+                reorder: true,
+                addAnotherPosition: "bottom",
+                layoutFixed: false,
+                enableRowGroups: false,
+                initEmpty: false,
+                tableView: false,
+                key: "theme_" + theme_num + "_components",
+                type: "datagrid",
+                input: true,
+                components: [get_block_elem()]
+            }],
 
             logic: [
                 {
@@ -414,8 +461,6 @@
             get_theme_panel(1, false),
             get_theme_panel(2, true),
             get_theme_panel(3, true),
-
-
         ]
     }).then(function (form) {
 
