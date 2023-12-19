@@ -53,31 +53,31 @@
     const LABEl_WIDTH = 20;
     //UI settings end
 
-    const get_hide_field_when_chart_tipe_logic = function () {
-        return [
-            {
-                name: "logic_ch_type",
-                trigger: {
-                    type: "simple",
-                    simple: {
-                        show: true,
-                        when: "element_type",
-                        eq: "card"
-                    }
-                },
-                actions: [{
-                    name: "action_ch_type",
-                    type: "property",
-                    property: {
-                        label: "Hidden",
-                        value: "hidden",
-                        type: "boolean"
-                    },
-                    state: true
-                }]
-            }
-        ]
-    }
+    // const get_hide_field_when_element_type_logic = function () {
+    //     return [
+    //         {
+    //             name: "logic_ch_type",
+    //             trigger: {
+    //                 type: "simple",
+    //                 simple: {
+    //                     show: true,
+    //                     when: "element_type",
+    //                     eq: "card"
+    //                 }
+    //             },
+    //             actions: [{
+    //          à       name: "action_ch_type",
+    //                 type: "property",
+    //                 property: {
+    //                     label: "Hidden",
+    //                     value: "hidden",
+    //                     type: "boolean"
+    //                 },
+    //                 state: true
+    //             }]
+    //         },
+    //     ]
+    // }
 
 
     const get_chart_options = function () {
@@ -96,9 +96,13 @@
                 key: "chart_type",
                 input: true,
                 values: [{ label: "Bar", value: "bar" }, { label: "Line", value: "line" }],
+                defaultValue: "bar",
                 labelPosition: LABEL_POSITION,
                 labelWidth: LABEl_WIDTH,
-                logic: get_hide_field_when_chart_tipe_logic()
+                //logic: get_hide_field_when_element_type_logic()
+                //conditional: { json: { "==": [{ var: "data.element_type" }, "chart"] } }
+                conditional: { show: true, json: { "==": [{ var: "row.element_type" }, "chart"] } }
+                //customConditional:"row.element_type=='card'?true:false"
             },
             {
                 type: "textfield",
@@ -109,7 +113,7 @@
                 input: true,
                 labelPosition: LABEL_POSITION,
                 labelWidth: LABEl_WIDTH,
-                logic: get_hide_field_when_chart_tipe_logic()
+                conditional: { show: true, json: { "==": [{ var: "row.element_type" }, "chart"] } }
             },
             {
                 type: "textfield",
@@ -120,7 +124,40 @@
                 input: true,
                 labelPosition: LABEL_POSITION,
                 labelWidth: LABEl_WIDTH,
-                logic: get_hide_field_when_chart_tipe_logic()
+                conditional: { show: true, json: { "==": [{ var: "row.element_type" }, "chart"] } }
+            },
+            {
+                type: "textfield",
+                label: "Zoom",
+                inline: true,
+                tableView: false,
+                key: "zoom",
+                input: true,
+                labelPosition: LABEL_POSITION,
+                labelWidth: LABEl_WIDTH,
+                conditional: { show: true, json: { "==": [{ var: "row.element_type" }, "map"] } }
+            },
+            {
+                type: "textfield",
+                label: "Latitude",
+                inline: true,
+                tableView: false,
+                key: "latitude",
+                input: true,
+                labelPosition: LABEL_POSITION,
+                labelWidth: LABEl_WIDTH,
+                conditional: { show: true, json: { "==": [{ var: "row.element_type" }, "map"] } }
+            },
+            {
+                type: "textfield",
+                label: "Longitude",
+                inline: true,
+                tableView: false,
+                key: "longitude",
+                input: true,
+                labelPosition: LABEL_POSITION,
+                labelWidth: LABEl_WIDTH,
+                conditional: { show: true, json: { "==": [{ var: "row.element_type" }, "map"] } }
             }]
         }
     }
@@ -310,7 +347,7 @@
                     key: "element_type",
                     label: 'Element type',
                     defaultValue: 'card',
-                    values: [{ label: "Card", value: "card" }, { label: "Map", value: "map" }, { label: "Chart", value: "chart" }],
+                    values: [{ label: "Card", value: "card" }, { label: "Chart", value: "chart" }, { label: "Map", value: "map" }],
                     input: true,
                     inline: true,
                     labelPosition: LABEL_POSITION,
