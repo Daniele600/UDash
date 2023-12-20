@@ -19,9 +19,13 @@ def get_structure(data_endpoint_url,cfg_data, lang):
     #api_access = sdmx_data_access.SDMX_DataAccess(data_endpoint_id, data_endpoint_url)
     api_access = sdmx_data_access.SDMX_DataAccess(data_endpoint_url)
 
-    ret = api_access.get_dataflow_info(
-        cfg_data["agency"], cfg_data["id"], cfg_data["version"], lang
-    )
+    # ret = api_access.get_dataflow_info(
+    #     cfg_data["agency"], cfg_data["id"], cfg_data["version"], lang
+    # )
+    print("cfg_data")
+    print(cfg_data)
+    splitted = cfg_data.split(",")
+    ret = api_access.get_dataflow_info(splitted[0],splitted[1],splitted[2],lang)
 
     return ret
 
@@ -68,17 +72,17 @@ SDMX structure and data utils
 """
 
 # composes the structure id as agency|id|version
-def get_structure_id(data_node):
-    return f"{data_node['agency']}|{data_node['id']}|{data_node['version']}"
+# def get_structure_id(data_node):
+#     return f"{data_node['agency']}|{data_node['id']}|{data_node['version']}"
 
 
 # Downloads and adds the structure to the struct object if it doesn't exist, skips otherwise
-def add_structure(data_endpoint_url, structs, data_cfg, lang):
-    struct_id = get_structure_id(data_cfg)
+def add_structure(data_endpoint_url, structs, struct_id, lang):
+    #struct_id = get_structure_id(data_cfg)
 
     if not struct_id in structs:
         # print("GETTING " + struct_id)
-        structs[struct_id] = get_structure(data_endpoint_url,data_cfg, lang)
+        structs[struct_id] = get_structure(data_endpoint_url,struct_id, lang)
     # else:
     # print(">>SKIPPED " + struct_id)
 
@@ -116,15 +120,15 @@ def _get_dim_or_attrib_from_struct(structs, struct_id, dim_or_attrib_id):
 
 
 
-def _get_struct_id(structid_or_data_cfg):
-    if isinstance(structid_or_data_cfg, dict):
-        return get_structure_id(structid_or_data_cfg)
-    return structid_or_data_cfg
+# def _get_struct_id(structid_or_data_cfg):
+#     if isinstance(structid_or_data_cfg, dict):
+#         return get_structure_id(structid_or_data_cfg)
+#     return structid_or_data_cfg
 
 
 def get_col_name(
     data_structures,
-    structid_or_data_cfg,
+    struct_id,
     dim_or_attrib_id,
     lang="en",
     lbl_override=None,
@@ -136,7 +140,7 @@ def get_col_name(
     ):
         return lbl_override[dim_or_attrib_id][lang]
 
-    struct_id = _get_struct_id(structid_or_data_cfg)
+    #struct_id = _get_struct_id(structid_or_data_cfg)
 
     item = _get_dim_or_attrib_from_struct(data_structures, struct_id, dim_or_attrib_id)
     if item is None:
