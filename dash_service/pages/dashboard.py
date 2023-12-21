@@ -22,6 +22,8 @@ from dash_service.pages import (
     get_multilang_value,
     is_string_empty,
     get_label_from_structure_and_code,
+    print_exception,
+    format_num
 )
 
 
@@ -61,7 +63,10 @@ ELEM_ID_HEADING = "HEADING"
 
 #CFG_N_THEMES = "THEMES"
 
-DBELEM = "DBELEM_"
+DASHB_ELEM = "DASHB_ELEM"
+
+#TODO Move it to config
+enpoint_url = "https://sdmx.data.unicef.org/ws/public/sdmxapi/rest"
 
 
 # set defaults
@@ -216,10 +221,6 @@ def render_page_template(
     if "main_title" in page_config:
         elem_main_title = HeadingAIO(page_config["main_title"], aio_id=ELEM_ID_HEADING)
 
-    # elem_years_selector = YearsRangeSelectorAIO(
-    #     aio_id=ELEM_ID_YEARS_RANGE_SEL, additional_classes="pb-2"
-    # )
-
     home_icon = None
     
     if "home_button" in page_config and "params" in page_config["home_button"]:
@@ -253,10 +254,6 @@ def render_page_template(
                         children=[dbc.ButtonGroup(id="theme_buttons")],
                     ),
                     html.Div(className="float-start align-middle ms-3", children=[home_icon]),
-                    # html.Div(
-                    #     className="d-flex justify-content-center",
-                    #     children=elem_years_selector,
-                    # ),
                 ],
             ),
             html.Div(id="dashboard_contents", className="mt-2", children=[]),
@@ -285,8 +282,75 @@ def get_theme_node(page_config:dict, theme_id:str):
             return t
     return None
 
+def _create_card(data_struct, page_config, elem_info, lang):
+    value = "-"
+    label = ""
+    data_source = ""
+    time_period = ""
+    ref_area = ""
+    lbl_sources = get_multilang_value(translations["sources"], lang)
+    lbl_time_period = get_multilang_value(translations["TIME_PERIOD"], lang)
+    lbl_area = ""
+
+    #it is a card, it only has one data query element
+    dataquery_node = elem_info["dataquery"][0]
+
+    if lang in translations[ID_REF_AREA]:
+        lbl_area = get_multilang_value(translations["REF_AREA"], lang)
+    else:
+        lbl_area = get_col_name(data_struct, dataquery_node["dataflow"], ID_REF_AREA, lang)
+
+    if is_string_empty(elem_info, "label"):
+        label = get_code_from_structure_and_dq(data_struct, dataquery_node, ID_INDICATOR)[
+            "name"
+        ]
+    else:
+        label = get_multilang_value(elem_info["label"], lang)
+        
+    # It is a card, we just need the most recent datapoint, no labels, just the value
+    try:
+        df = get_data(enpoint_url,dataquery_node, lastnobservations=1, labels="id")
+    # except ConnectionError as conn_err:
+    except requests.exceptions.HTTPError as e:
+        print_exception("Exception while downloading data for card", e)
+        df = pd.DataFrame()
+
+    if len(df) > 0:
+        value = df.iloc[0][ID_OBS_VALUE]
+        if "round" in elem_info and is_float(value):
+            value = round(float(value), elem_info["round"])
+        value = format_num(value)
+
+        time_period = df.iloc[0][ID_TIME_PERIOD]
+        ref_area = df.iloc[0][ID_REF_AREA]
+        ref_area = get_code_from_structure_and_dq(       data_struct, dataquery_node, ID_REF_AREA        )["name"]
+        if ID_DATA_SOURCE in df.columns:
+            data_source = df.iloc[0][ID_DATA_SOURCE]
+
+        ret = html.Div(
+        # className="col",
+        children=CardAIO(
+            aio_id=elem_info["uid"],
+            value=value,
+            suffix=label,
+            info_head=lbl_sources,
+            info_body=data_source,
+            time_period=time_period,
+            area=ref_area,
+            lbl_time_period=lbl_time_period,
+            lbl_area=lbl_area,
+        ),
+    )
+
+    return ret
+    
 
 
+
+
+
+
+# Trigger order: 1
 # Triggered when the theme changes
 # It only updates the state of the theme selection
 @callback(
@@ -313,24 +377,11 @@ def new_selection_state(theme, page_config, lang):
 
     return selections
     
-
-
-def _get_elem_id(row, col):
-    return f"{DBELEM}{row}_{col}"
-
-
-def _get_elem_cfg_pos(elem_id):
-    return {
-        "row": int(elem_id.split("_")[1]),
-        "col": int(elem_id.split("_")[2]),
-    }
-
-
+# Trigger order: 2
 # Triggered when the selection state changes
 @callback(
     Output(HeadingAIO.ids.subtitle(ELEM_ID_HEADING), "children"),
     Output("theme_buttons", "children"),
-    # Output("dashboard_contents", "children"),
     [
         Input("sel_state", "data"),
     ],
@@ -362,7 +413,8 @@ def show_themes(selections, page_config):
 
     return subtitle, theme_buttons
 
-
+# Trigger order: 2 
+#Downloads all the data structures needed to populate the theme
 @callback(
     Output("data_structures", "data"),
     [Input("sel_state", "data")],
@@ -372,9 +424,6 @@ def show_themes(selections, page_config):
 # Typically 1 dataflow per page but can handle data from multiple Dataflows in 1 page
 def download_structures(selections, page_config, lang):
     data_structures = {}
-    #TODO Move it back to config
-    enpoint_url = "https://sdmx.data.unicef.org/ws/public/sdmxapi/rest"
-    #enpoint_url = page_config["global_data_endpoint"]
 
     #theme_node = page_config[CFG_N_THEMES][selections["theme"]]
     theme_node = get_theme_node(page_config, selections["theme"])
@@ -384,28 +433,86 @@ def download_structures(selections, page_config, lang):
             if "dataquery" in comp:
                 for dq in comp["dataquery"]:
                     if "dataflow" in dq and dq["dataflow"].strip()!="":
-                        add_structure(enpoint_url, data_structures, dq["dataflow"], lang)
+                        add_structure(enpoint_url, data_structures, dq, lang)
 
 
     return data_structures
 
 
-def _round_pandas_col(df, col_name, round_to):
-    if len(df) == 0:
-        return df
-    df[col_name] = pd.to_numeric(df[col_name], errors="ignore")
-    if pandas.api.types.is_numeric_dtype(df[col_name]):
-        df = df.round({col_name: round_to})
-    return df
+# Trigger order: 3
+# Data structures have been downloaded -> create the elements
+@callback(
+    Output("dashboard_contents", "children"),
+    [Input("data_structures", "data")],
+    [State("sel_state", "data"), State("page_config", "data"), State("lang", "data")],
+)
+def create_elements(data_struct, selections, page_config, lang):
+    bootstrap_cols_map = {
+        "1": "col",
+        "2": "col-lg-6 col-sm-12",
+        "3": "col-lg-4 col-sm-12",
+        "4": "col-lg-3 col-sm-12",
+        "5": "col-lg-2 col-sm-6",
+        "6": "col-lg-2 col-sm-6",
+    }
+
+    dashb_contents = []
+    theme_node = get_theme_node(page_config, selections["theme"])
+
+    #create a helper structure to handle the elements that will be created
+    # elems_to_create = []
+    elems_per_row = {}
+    #divs_per_row = []
+    row_keys = []
+    for comp in theme_node["components"]:
+        # elems_to_create.append({
+        #     "row":comp["element_row"],
+        #     "pos":comp["element_pos"],
+        #     "cmoponent":comp,
+        #     "elem_id": f'{DASHB_ELEM}_{comp["element_row"]}_{comp["element_pos"]}',
+        #     #"elems_per_row": len(row["elements"]),
+        # })
+
+        if comp["element_row"] in elems_per_row:
+            elems_per_row[comp["element_row"]].append(comp)
+        else:
+            elems_per_row[comp["element_row"]]=[comp]
+        if not comp["element_row"] in row_keys:
+            row_keys.append(comp["element_row"])
+        row_keys.sort()
+    
+    #sorted(elems_to_create, key=lambda item:(item["row"],item["pos"]))
+
+    for row_key in row_keys:
+        row_elems = elems_per_row[row_key]
+        bs_col = bootstrap_cols_map.get(str(len(row_elems)), "col-1")
+        div_elems = []
+        for row_elem in row_elems:
+        #elem = html.Div(className=bs_col, children=elem)
+            print("RE")
+            print(row_elem)
+            if row_elem["element_type"]=="card":
+                elem = _create_card(data_struct, page_config, row_elem, lang)
+            # elif row_elem["element_type"]=="chart":
+            #     _create_chart_placeholder(data_struct, page_config, row_elem, lang)
+            # elif row_elem["element_type"]=="map":
+            #     _create_map_placeholder(data_struct, page_config, row_elem, lang)
+            elem = html.Div(className=bs_col, children=elem)
+            div_elems.append(elem)
 
 
-def format_num(n):
-    if is_int(n):
-        ret = "{0:{grp}d}".format(int(n), grp="_")
-    elif is_float(n):
-        ret = "{0:{grp}g}".format(float(n), grp="_")
-    else:
-        return n
-    return ret.replace("_", " ")
+            
+            #div_elems.append(html.Div(className=bs_col, children=[html.Div(className="bg-danger w-100 min-vh-10", children=["jhg"])]))
+
+        dashb_contents.append(
+            html.Div(className="row mb-4", children=div_elems)
+        )
+
+    return dashb_contents
+
+
+
+
+
 
 

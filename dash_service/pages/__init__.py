@@ -22,7 +22,7 @@ def get_structure(data_endpoint_url,cfg_data, lang):
     # ret = api_access.get_dataflow_info(
     #     cfg_data["agency"], cfg_data["id"], cfg_data["version"], lang
     # )
-    print("cfg_data")
+    print("cfg_data STRUCT")
     print(cfg_data)
     splitted = cfg_data.split(",")
     ret = api_access.get_dataflow_info(splitted[0],splitted[1],splitted[2],lang)
@@ -44,10 +44,12 @@ def get_data(data_endpoint_url,cfg_data, years=None, lastnobservations=None, lab
         startperiod = cfg_data["startperiod"]
     if "endperiod" in cfg_data:
         endperiod = cfg_data["endperiod"]
+    print("cfg_data DATA")
+    print(cfg_data)
+    dataflow_id_split = cfg_data["dataflow"].split(",")
+
     df = api_access.get_data(
-        cfg_data["agency"],
-        cfg_data["id"],
-        cfg_data["version"],
+        dataflow_id_split[0],dataflow_id_split[1],dataflow_id_split[2],
         dq=cfg_data["dq"],
         lastnobs=lastnobservations,
         startperiod=startperiod,
@@ -77,12 +79,12 @@ SDMX structure and data utils
 
 
 # Downloads and adds the structure to the struct object if it doesn't exist, skips otherwise
-def add_structure(data_endpoint_url, structs, struct_id, lang):
+def add_structure(data_endpoint_url, structs, data_cfg, lang):
     #struct_id = get_structure_id(data_cfg)
 
-    if not struct_id in structs:
+    if not data_cfg["dataflow"] in structs:
         # print("GETTING " + struct_id)
-        structs[struct_id] = get_structure(data_endpoint_url,struct_id, lang)
+        structs[data_cfg["dataflow"]] = get_structure(data_endpoint_url,data_cfg["dataflow"], lang)
     # else:
     # print(">>SKIPPED " + struct_id)
 
@@ -109,21 +111,6 @@ def _get_dim_or_attrib_from_struct(structs, struct_id, dim_or_attrib_id):
         )
 
     return cl
-
-# def get_codelist_from_struct(structs, struct_id, dim_or_attrib_id):
-#     dim_attr = _get_dim_or_attrib_from_struct(structs, struct_id, dim_or_attrib_id)
-    
-#     if "codes" in dim_attr:
-#         return dim_attr["codes"]
-#     else:
-#         return None
-
-
-
-# def _get_struct_id(structid_or_data_cfg):
-#     if isinstance(structid_or_data_cfg, dict):
-#         return get_structure_id(structid_or_data_cfg)
-#     return structid_or_data_cfg
 
 
 def get_col_name(
@@ -157,11 +144,10 @@ def _get_dim_position(data_structures, struct_id, dim_id):
 
 
 def get_code_from_structure_and_dq(data_structures, data_cfg, column_id):
-    struct_id = _get_struct_id(data_cfg)
-    code_index = _get_dim_position(data_structures, struct_id, column_id)
+    code_index = _get_dim_position(data_structures, data_cfg["dataflow"], column_id)
     code_id = data_cfg["dq"].split(".")[code_index]
 
-    dim_attr = _get_dim_or_attrib_from_struct(data_structures, struct_id, column_id)
+    dim_attr = _get_dim_or_attrib_from_struct(data_structures, data_cfg["dataflow"], column_id)
     if "codes" in dim_attr:
         codelist = dim_attr["codes"]
     else:
@@ -169,9 +155,7 @@ def get_code_from_structure_and_dq(data_structures, data_cfg, column_id):
     return next((c for c in codelist if c["id"] == code_id),None)
 
 def get_label_from_structure_and_code(data_structures, data_cfg, column_id, code_id):
-    struct_id = _get_struct_id(data_cfg)
-
-    dim_attr = _get_dim_or_attrib_from_struct(data_structures, struct_id, column_id)
+    dim_attr = _get_dim_or_attrib_from_struct(data_structures, data_cfg["dataflow"], column_id)
     if "codes" in dim_attr:
         codelist = dim_attr["codes"]
     else:
@@ -247,3 +231,19 @@ def is_int(to_test)->bool:
         return True
     except ValueError:
         return False
+    
+def print_exception(message, exc):
+    print(message)
+    print("Exception type:")
+    print(type(exc))
+    print("Exception args:")
+    print(exc.args)
+
+def format_num(n):
+    if is_int(n):
+        ret = "{0:{grp}d}".format(int(n), grp="_")
+    elif is_float(n):
+        ret = "{0:{grp}g}".format(float(n), grp="_")
+    else:
+        return n
+    return ret.replace("_", " ")

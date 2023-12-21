@@ -9,6 +9,7 @@ from wtforms.fields import PasswordField
 from wtforms import validators
 from .app_settings import FILES_UPLOAD_PATH,FILES_UPLOAD_ALLOWED_EXT
 import flask_login
+import uuid
 
 from flask_admin.form import rules
 
@@ -310,6 +311,8 @@ class DashboardView(ModelView):
 
     form_choices = {"geography": items}
 
+    
+
     def is_accessible(self):
         return get_current_user().is_authenticated
 
@@ -326,6 +329,12 @@ class DashboardView(ModelView):
         return self.session.query(func.count("*")).filter(
             Page.project_id == get_current_user().project_id
         )
+    
+    def on_model_change(self, form, model, is_created):
+        component_nodes_key = [k for k in form.content.data if k.startswith("theme_components_")]
+        for k in component_nodes_key:
+            for comp in form.content.data[k]:
+                comp["uid"] = str(uuid.uuid4())
 
 
 
