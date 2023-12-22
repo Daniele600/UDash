@@ -282,6 +282,38 @@ def get_theme_node(page_config:dict, theme_id:str):
             return t
     return None
 
+
+
+# loops the data node and returns the options for the dropdownlists: options + default value
+def get_ddl_values(data_node, data_structures, column_id, lang):
+    items = []
+    default_item = ""
+    for idx, data_cfg in enumerate(data_node):
+        # is it there a label? Override the one read from the data
+        if not is_string_empty(data_cfg):
+            lbl = get_multilang_value(data_cfg["label"], lang)
+        elif "multi_indicator" in data_cfg:
+            labels = []
+            for multi_cfg in data_cfg["multi_indicator"]:
+                tmp_lbl = get_code_from_structure_and_dq(
+                    data_structures, multi_cfg, column_id
+                )["name"]
+                labels.append(tmp_lbl)
+            lbl = " - ".join(labels)
+
+        else:
+            lbl = get_code_from_structure_and_dq(data_structures, data_cfg, column_id)[
+                "name"
+            ]
+
+        items.append({"label": lbl, "value": str(idx)})
+        if idx == 0:
+            default_item = str(idx)
+    return items, default_item
+
+
+
+
 def _create_card(data_struct, page_config, elem_info, lang):
     value = "-"
     label = ""
@@ -343,6 +375,52 @@ def _create_card(data_struct, page_config, elem_info, lang):
     )
 
     return ret
+
+def _create_chart_placeholder(data_struct, page_config, elem_info, lang):
+    #elem = elem_info["elem"]
+    title = elem_info.get("label", "")
+    # The dropdownlist elements
+    ddl_items, default_item = get_ddl_values(
+        elem_info["dataquery"], data_struct, ID_INDICATOR, lang
+    )
+    chart_types = [{"label":get_multilang_value(translations[t], lang), "value":t} for t in elem_info["chart_type"] if elem_info["chart_type"]]
+    default_graph = chart_types[0]["value"]
+
+    ret = ChartAIO(
+        aio_id=elem_info["uid"],
+        title=title,
+        plot_cfg=cfg_plot,
+        info_title=get_multilang_value(translations["sources"], lang),
+        lbl_excel=get_multilang_value(translations["download_excel"], lang),
+        lbl_csv=get_multilang_value(translations["download_csv"], lang),
+        dropdownlist_options=ddl_items,
+        dropdownlist_value=default_item,
+        chart_types=chart_types,
+        default_graph=default_graph,
+    )
+
+    # return html.Div(className="col", children=ret)
+    return html.Div(children=ret)
+
+def _create_map_placeholder(data_struct, page_config, elem_info, lang):
+    title = elem_info.get("label", "")
+    ddl_items, default_item = get_ddl_values(
+        elem_info["dataquery"], data_struct, ID_INDICATOR, lang
+    )
+
+    ret = MapAIO(
+        aio_id=elem_info["uid"],
+        title=title,
+        plot_cfg=cfg_plot,
+        info_title=get_multilang_value(translations["sources"], lang),
+        lbl_show_hist=get_multilang_value(translations["show_historical"], lang),
+        lbl_excel=get_multilang_value(translations["download_excel"], lang),
+        lbl_csv=get_multilang_value(translations["download_csv"], lang),
+        dropdownlist_options=ddl_items,
+        dropdownlist_value=default_item,
+    )
+
+    return html.Div(children=ret)
     
 
 
@@ -465,13 +543,6 @@ def create_elements(data_struct, selections, page_config, lang):
     #divs_per_row = []
     row_keys = []
     for comp in theme_node["components"]:
-        # elems_to_create.append({
-        #     "row":comp["element_row"],
-        #     "pos":comp["element_pos"],
-        #     "cmoponent":comp,
-        #     "elem_id": f'{DASHB_ELEM}_{comp["element_row"]}_{comp["element_pos"]}',
-        #     #"elems_per_row": len(row["elements"]),
-        # })
 
         if comp["element_row"] in elems_per_row:
             elems_per_row[comp["element_row"]].append(comp)
@@ -480,30 +551,30 @@ def create_elements(data_struct, selections, page_config, lang):
         if not comp["element_row"] in row_keys:
             row_keys.append(comp["element_row"])
         row_keys.sort()
-    
-    #sorted(elems_to_create, key=lambda item:(item["row"],item["pos"]))
 
     for row_key in row_keys:
         row_elems = elems_per_row[row_key]
         bs_col = bootstrap_cols_map.get(str(len(row_elems)), "col-1")
         div_elems = []
         for row_elem in row_elems:
-        #elem = html.Div(className=bs_col, children=elem)
+
+
+            print("RE")
             print("RE")
             print(row_elem)
+
+
             if row_elem["element_type"]=="card":
                 elem = _create_card(data_struct, page_config, row_elem, lang)
-            # elif row_elem["element_type"]=="chart":
-            #     _create_chart_placeholder(data_struct, page_config, row_elem, lang)
-            # elif row_elem["element_type"]=="map":
-            #     _create_map_placeholder(data_struct, page_config, row_elem, lang)
-            elem = html.Div(className=bs_col, children=elem)
-            div_elems.append(elem)
+            elif row_elem["element_type"]=="chart":
+                elem = _create_chart_placeholder(data_struct, page_config, row_elem, lang)
+            elif row_elem["element_type"]=="map":
+                _create_map_placeholder(data_struct, page_config, row_elem, lang)
+            else:
+                elem = None
 
-
-            
-            #div_elems.append(html.Div(className=bs_col, children=[html.Div(className="bg-danger w-100 min-vh-10", children=["jhg"])]))
-
+            div_elems.append(html.Div(className=bs_col, children=elem))
+        
         dashb_contents.append(
             html.Div(className="row mb-4", children=div_elems)
         )

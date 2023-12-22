@@ -88,7 +88,7 @@
             "input": false,
             "tableView": false,
             "components": [{
-                type: "radio",
+                type: "selectboxes",
                 label: "Chart type",
                 optionsLabelPosition: "right",
                 inline: true,
@@ -190,13 +190,23 @@
                 ],
                 labelPosition: LABEL_POSITION,
                 labelWidth: LABEl_WIDTH,
-            }
-            ,
+            },
             {
 
                 type: 'textfield',
                 key: "dq",
                 label: 'Data query',
+                input: true,
+                tableview: true,
+                labelPosition: LABEL_POSITION,
+                labelWidth: LABEl_WIDTH,
+
+            },
+            {
+
+                type: 'textfield',
+                key: "dq_lbl_override",
+                label: 'Custom label',
                 input: true,
                 tableview: true,
                 labelPosition: LABEL_POSITION,
