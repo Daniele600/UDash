@@ -282,6 +282,14 @@ def get_theme_node(page_config:dict, theme_id:str):
             return t
     return None
 
+def get_element_by_uid(page_config:dict, uid:str):
+    themes = get_themes(page_config)
+    for t in themes:
+        for comp in t["components"]:
+            if comp["uid"]==uid:
+                return comp
+    return None
+
 
 
 # loops the data node and returns the options for the dropdownlists: options + default value
@@ -399,7 +407,6 @@ def _create_chart_placeholder(data_struct, page_config, elem_info, lang):
         default_graph=default_graph,
     )
 
-    # return html.Div(className="col", children=ret)
     return html.Div(children=ret)
 
 def _create_map_placeholder(data_struct, page_config, elem_info, lang):
@@ -474,9 +481,6 @@ def show_themes(selections, page_config):
         theme_node=themes[0]
     else:
         theme_node=get_theme_node(page_config,selections["theme"])
-
-    print("theme_node")
-    print(theme_node)
 
     subtitle = theme_node.get("name", "")
 
@@ -557,21 +561,14 @@ def create_elements(data_struct, selections, page_config, lang):
         bs_col = bootstrap_cols_map.get(str(len(row_elems)), "col-1")
         div_elems = []
         for row_elem in row_elems:
-
-
-            print("RE")
-            print("RE")
-            print(row_elem)
-
-
+            elem = None
             if row_elem["element_type"]=="card":
                 elem = _create_card(data_struct, page_config, row_elem, lang)
             elif row_elem["element_type"]=="chart":
                 elem = _create_chart_placeholder(data_struct, page_config, row_elem, lang)
             elif row_elem["element_type"]=="map":
-                _create_map_placeholder(data_struct, page_config, row_elem, lang)
-            else:
-                elem = None
+                elem = _create_map_placeholder(data_struct, page_config, row_elem, lang)
+
 
             div_elems.append(html.Div(className=bs_col, children=elem))
         
@@ -587,3 +584,68 @@ def create_elements(data_struct, selections, page_config, lang):
 
 
 
+# Triggered when the selection changes. Updates the charts.
+@callback(
+    Output(ChartAIO.ids.chart(MATCH), "figure"),
+    Output(ChartAIO.ids.info_text(MATCH), "children"),
+    Output(ChartAIO.ids.info_icon(MATCH), "style"),
+    Output(ChartAIO.ids.missing_areas(MATCH), "children"),
+    Output(ChartAIO.ids.download_api_call(MATCH), "value"),
+    [
+        Input(ChartAIO.ids.ddl(MATCH), "value"),
+        Input(ChartAIO.ids.chart_types(MATCH), "value"),
+    ],
+    [
+        State("data_structures", "data"),
+        State("sel_state", "data"),
+        State("page_config", "data"),
+        State(ChartAIO.ids.card_title(MATCH), "id"),
+        State("lang", "data"),
+    ],
+)
+def update_charts(
+    ddl_value, chart_type, data_structures, selections, page_config, component_id, lang
+):
+    #selected_theme = get_theme_node(page_config,selections["theme"])
+    print("component_id")
+    print(component_id)
+    #Find the element in the configuration having the matching uid
+    updated_elem = get_element_by_uid(page_config,component_id["aio_id"])
+    print(updated_elem)
+    # find the data node in the configuration for the user's selection
+    data_cfg = updated_elem["dataquery"][int(ddl_value)]
+
+
+
+
+# Data download (Excel)
+@callback(
+    Output(DownloadsAIO.ids.dcc_down_excel(MATCH), "data"),
+    [
+        Input(DownloadsAIO.ids.btn_down_excel(ALL), "n_clicks"),
+    ],
+    [
+        State(ChartAIO.ids.download_api_call(ALL), "value"),
+        State(MapAIO.ids.download_api_call(ALL), "value"),
+        State("page_config", "data"),
+        State("sel_state", "data"),
+    ],
+    prevent_initial_call=True,
+)
+# Downloads the DSD for the data.
+def download_excel(n_clicks, chart_api_call, map_api_call,page_config, selections):
+    #theme = get_theme_node(page_config,selections["theme"])
+    updated_elem = get_element_by_uid(page_config,ctx.triggered_id["aio_id"])
+
+    print("ctx.triggered_id")
+    print(ctx.triggered_id)
+    print("chart_api_call")
+    print(chart_api_call,)
+    print("map_api_call")
+    print(map_api_call)
+
+
+    # triggered_cfg = _find_triggerer(ctx.triggered_id, chart_api_call, map_api_call)
+    # df = _get_data_for_download(triggered_cfg,page_config)
+    df = pd.DataFrame({"A":"a"})
+    # return dcc.send_data_frame(df.to_excel, "data.xlsx", index=False)

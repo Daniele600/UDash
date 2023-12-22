@@ -16,14 +16,8 @@ def page_not_found(pathname):
 
 # def get_data(cfg_data, years=None, countries=[], last_n_obs=False, labels="id"):
 def get_structure(data_endpoint_url,cfg_data, lang):
-    #api_access = sdmx_data_access.SDMX_DataAccess(data_endpoint_id, data_endpoint_url)
     api_access = sdmx_data_access.SDMX_DataAccess(data_endpoint_url)
 
-    # ret = api_access.get_dataflow_info(
-    #     cfg_data["agency"], cfg_data["id"], cfg_data["version"], lang
-    # )
-    print("cfg_data STRUCT")
-    print(cfg_data)
     splitted = cfg_data.split(",")
     ret = api_access.get_dataflow_info(splitted[0],splitted[1],splitted[2],lang)
 
@@ -44,8 +38,6 @@ def get_data(data_endpoint_url,cfg_data, years=None, lastnobservations=None, lab
         startperiod = cfg_data["startperiod"]
     if "endperiod" in cfg_data:
         endperiod = cfg_data["endperiod"]
-    print("cfg_data DATA")
-    print(cfg_data)
     dataflow_id_split = cfg_data["dataflow"].split(",")
 
     df = api_access.get_data(
