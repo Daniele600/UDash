@@ -391,7 +391,13 @@ def _create_chart_placeholder(data_struct, page_config, elem_info, lang):
     ddl_items, default_item = get_ddl_values(
         elem_info["dataquery"], data_struct, ID_INDICATOR, lang
     )
-    chart_types = [{"label":get_multilang_value(translations[t], lang), "value":t} for t in elem_info["chart_type"] if elem_info["chart_type"]]
+    #chart_types = [{"label":get_multilang_value(translations[t], lang), "value":t} for t in elem_info["chart_type"] if elem_info["chart_type"]]
+    chart_type_node_prefix = "chart_type_"
+    chart_types = [k for k in elem_info.keys() if k.startswith(chart_type_node_prefix)]
+    chart_types = [k for k in chart_types if elem_info[k]["is_active"]]
+    chart_types = [k[len(chart_type_node_prefix):] for k in chart_types]
+    chart_types = [{"label":get_multilang_value(translations[t], lang), "value":t} for t in chart_types]
+    
     default_graph = chart_types[0]["value"]
 
     ret = ChartAIO(

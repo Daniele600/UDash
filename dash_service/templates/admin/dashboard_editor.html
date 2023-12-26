@@ -50,23 +50,35 @@
 
     //UI settings:
     const LABEL_POSITION = "left-left";
-    const LABEl_WIDTH = 20;
+    const LABEL_WIDTH = 20;
     //UI settings end
 
-    const get_chart_type_bar_options = function () {
+    const get_chart_type_options = function (chart_type) {
+        //let key_is_active = "";
+        let label = "";
+        if (chart_type == "bar") {
+            //key_is_active = "chart_bar_isactive";
+            label = "Bar chart";
+        }
+        else if (chart_type == "line") {
+            //key_is_active = "line_bar_isactive";
+            label = "Line chart";
+        }
         return {
-            collapsible: false,
-            hideLabel: true,
-            key: "panel",
-            type: "panel",
+            //collapsible: false,
+            //hideLabel: true,
+            key: "chart_type_" + chart_type,
+            type: "container",
             label: "",
-            input: false,
+            input: true,
             tableView: false,
+            conditional: { show: true, json: { "==": [{ var: "row.element_type" }, "chart"] } },
 
             components: [{
                 label: "",
-                key: "col_bar_chart_options",
+                key: "col_chart_type_options",
                 type: "columns",
+                
                 input: false,
                 tableView: false,
                 columns: [
@@ -78,7 +90,7 @@
                         size: "md",
                         currentWidth: 2,
                         components: [{
-                            label: "Bar chart", tableView: true, key: "chart_bar_isactive", type: "checkbox", input: true, labelPosition: LABEL_POSITION, labelWidth: LABEl_WIDTH,
+                            label: label, tableView: true, key: "is_active", type: "checkbox", input: true, labelPosition: LABEL_POSITION, labelWidth: LABEL_WIDTH,
                         }]
                     },
                     {
@@ -89,7 +101,7 @@
                         size: "md",
                         currentWidth: 5,
                         components: [{
-                            label: "X axis", tableView: true, key: "chart_bar_x", type: "textfield", input: true, labelPosition: LABEL_POSITION, labelWidth: LABEl_WIDTH,
+                            label: "X axis", tableView: true, key: "chart_x", type: "textfield", input: true, labelPosition: LABEL_POSITION, labelWidth: LABEL_WIDTH,
                         }]
                     },
                     {
@@ -100,7 +112,7 @@
                         size: "md",
                         currentWidth: 5,
                         components: [{
-                            label: "Y axis", tableView: true, key: "chart_bar_y", type: "textfield", input: true, labelPosition: LABEL_POSITION, labelWidth: LABEl_WIDTH,
+                            label: "Y axis", tableView: true, key: "chart_y", type: "textfield", input: true, labelPosition: LABEL_POSITION, labelWidth: LABEL_WIDTH,
                         }]
                     }
                 ]
@@ -117,48 +129,27 @@
             "input": false,
             "tableView": false,
             "components": [
-                {
-                    type: "selectboxes",
-                    label: "Chart type",
-                    optionsLabelPosition: "right",
-                    inline: true,
-                    tableView: false,
-                    key: "chart_type",
-                    input: true,
-                    values: [{ label: "Bar", value: "bar" }, { label: "Line", value: "line" }],
-                    defaultValue: "bar",
-                    labelPosition: LABEL_POSITION,
-                    labelWidth: LABEl_WIDTH,
+                // {
+                //     type: "selectboxes",
+                //     label: "Chart type",
+                //     optionsLabelPosition: "right",
+                //     inline: true,
+                //     tableView: false,
+                //     key: "chart_type",
+                //     input: true,
+                //     values: [{ label: "Bar", value: "bar" }, { label: "Line", value: "line" }],
+                //     defaultValue: "bar",
+                //     labelPosition: LABEL_POSITION,
+                //     labelWidth: LABEL_WIDTH,
 
-                    conditional: { show: true, json: { "==": [{ var: "row.element_type" }, "chart"] } }
+                //     conditional: { show: true, json: { "==": [{ var: "row.element_type" }, "chart"] } }
 
-                },
+                // },
 
 
-                get_chart_type_bar_options(),
+                get_chart_type_options("bar"),
+                get_chart_type_options("line"),
 
-                {
-                    type: "textfield",
-                    label: "X axis",
-                    inline: true,
-                    tableView: false,
-                    key: "x",
-                    input: true,
-                    labelPosition: LABEL_POSITION,
-                    labelWidth: LABEl_WIDTH,
-                    conditional: { show: true, json: { "==": [{ var: "row.element_type" }, "chart"] } }
-                },
-                {
-                    type: "textfield",
-                    label: "Y axis",
-                    inline: true,
-                    tableView: false,
-                    key: "y",
-                    input: true,
-                    labelPosition: LABEL_POSITION,
-                    labelWidth: LABEl_WIDTH,
-                    conditional: { show: true, json: { "==": [{ var: "row.element_type" }, "chart"] } }
-                },
                 {
                     type: "textfield",
                     label: "Zoom",
@@ -167,7 +158,7 @@
                     key: "zoom",
                     input: true,
                     labelPosition: LABEL_POSITION,
-                    labelWidth: LABEl_WIDTH,
+                    labelWidth: LABEL_WIDTH,
                     conditional: { show: true, json: { "==": [{ var: "row.element_type" }, "map"] } }
                 },
                 {
@@ -178,7 +169,7 @@
                     key: "latitude",
                     input: true,
                     labelPosition: LABEL_POSITION,
-                    labelWidth: LABEl_WIDTH,
+                    labelWidth: LABEL_WIDTH,
                     conditional: { show: true, json: { "==": [{ var: "row.element_type" }, "map"] } }
                 },
                 {
@@ -189,7 +180,7 @@
                     key: "longitude",
                     input: true,
                     labelPosition: LABEL_POSITION,
-                    labelWidth: LABEl_WIDTH,
+                    labelWidth: LABEL_WIDTH,
                     conditional: { show: true, json: { "==": [{ var: "row.element_type" }, "map"] } }
                 }]
         }
@@ -222,7 +213,7 @@
                     }
                 ],
                 labelPosition: LABEL_POSITION,
-                labelWidth: LABEl_WIDTH,
+                labelWidth: LABEL_WIDTH,
             },
             {
 
@@ -232,7 +223,7 @@
                 input: true,
                 tableview: true,
                 labelPosition: LABEL_POSITION,
-                labelWidth: LABEl_WIDTH,
+                labelWidth: LABEL_WIDTH,
 
             },
             {
@@ -243,7 +234,7 @@
                 input: true,
                 tableview: true,
                 labelPosition: LABEL_POSITION,
-                labelWidth: LABEl_WIDTH,
+                labelWidth: LABEL_WIDTH,
 
             }]
     }
@@ -254,7 +245,7 @@
         placeholder: "AGENCY",
         input: true,
         labelPosition: LABEL_POSITION,
-        labelWidth: LABEl_WIDTH,
+        labelWidth: LABEL_WIDTH,
     },
     {
         type: 'textfield',
@@ -263,7 +254,7 @@
         placeholder: "ID",
         input: true,
         labelPosition: LABEL_POSITION,
-        labelWidth: LABEl_WIDTH,
+        labelWidth: LABEL_WIDTH,
     }, {
         type: 'textfield',
         key: 'version',
@@ -271,7 +262,7 @@
         placeholder: "VERSION",
         input: true,
         labelPosition: LABEL_POSITION,
-        labelWidth: LABEl_WIDTH,
+        labelWidth: LABEL_WIDTH,
         //tableview: false,
     }]
 
@@ -289,7 +280,7 @@
                         type: "textfield",
                         input: true,
                         labelPosition: LABEL_POSITION,
-                        labelWidth: LABEl_WIDTH,
+                        labelWidth: LABEL_WIDTH,
 
                         logic: [
                             {
@@ -367,7 +358,7 @@
                     "input": true,
                     "defaultValue": 1,
                     labelPosition: LABEL_POSITION,
-                    labelWidth: LABEl_WIDTH,
+                    labelWidth: LABEL_WIDTH,
                 },
                 {
                     "label": "Position",
@@ -383,7 +374,7 @@
                     "input": true,
                     "defaultValue": 1,
                     labelPosition: LABEL_POSITION,
-                    labelWidth: LABEl_WIDTH,
+                    labelWidth: LABEL_WIDTH,
                 },
                 {
                     type: 'radio',
@@ -394,7 +385,7 @@
                     input: true,
                     inline: true,
                     labelPosition: LABEL_POSITION,
-                    labelWidth: LABEl_WIDTH,
+                    labelWidth: LABEL_WIDTH,
                 },
                 {
                     type: 'textfield',
@@ -405,7 +396,7 @@
                     //tooltip: 'Enter your <strong>First Name</strong>',
                     placeholder: 'Leave empty to pull the label from the data',
                     labelPosition: LABEL_POSITION,
-                    labelWidth: LABEl_WIDTH,
+                    labelWidth: LABEL_WIDTH,
                 },
                 get_chart_options(),
                 {
