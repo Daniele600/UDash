@@ -12,8 +12,8 @@ from dash.dependencies import MATCH, Input, Output, State, ALL
 from dash_service.models import Page, Project, Dashboard
 import json
 
-from dash_service.pages import get_data, is_float, is_int, years, get_geojson
 from dash_service.pages import (
+    get_data, is_float, is_int, years, get_geojson,get_data_with_labels,
     add_structure,
     #get_structure_id,
     get_code_from_structure_and_dq,
@@ -23,7 +23,8 @@ from dash_service.pages import (
     is_string_empty,
     get_label_from_structure_and_code,
     print_exception,
-    format_num
+    format_num,
+    round_pandas_col
 )
 
 
@@ -66,7 +67,10 @@ ELEM_ID_HEADING = "HEADING"
 DASHB_ELEM = "DASHB_ELEM"
 
 #TODO Move it to config
-enpoint_url = "https://sdmx.data.unicef.org/ws/public/sdmxapi/rest"
+endpoint_url = "https://sdmx.data.unicef.org/ws/public/sdmxapi/rest"
+CHART_TYPE_NODE_PREFIX = "chart_type_"
+CFG_TIME_PERIOD_START = "year_start"
+CFG_TIME_PERIOD_END = "year_end"
 
 
 # set defaults
@@ -349,7 +353,7 @@ def _create_card(data_struct, page_config, elem_info, lang):
         
     # It is a card, we just need the most recent datapoint, no labels, just the value
     try:
-        df = get_data(enpoint_url,dataquery_node, lastnobservations=1, labels="id")
+        df = get_data(endpoint_url,dataquery_node, lastnobservations=1, labels="id")
     # except ConnectionError as conn_err:
     except requests.exceptions.HTTPError as e:
         print_exception("Exception while downloading data for card", e)
@@ -392,10 +396,9 @@ def _create_chart_placeholder(data_struct, page_config, elem_info, lang):
         elem_info["dataquery"], data_struct, ID_INDICATOR, lang
     )
     #chart_types = [{"label":get_multilang_value(translations[t], lang), "value":t} for t in elem_info["chart_type"] if elem_info["chart_type"]]
-    chart_type_node_prefix = "chart_type_"
-    chart_types = [k for k in elem_info.keys() if k.startswith(chart_type_node_prefix)]
+    chart_types = [k for k in elem_info.keys() if k.startswith(CHART_TYPE_NODE_PREFIX)]
     chart_types = [k for k in chart_types if elem_info[k]["is_active"]]
-    chart_types = [k[len(chart_type_node_prefix):] for k in chart_types]
+    chart_types = [k[len(CHART_TYPE_NODE_PREFIX):] for k in chart_types]
     chart_types = [{"label":get_multilang_value(translations[t], lang), "value":t} for t in chart_types]
     
     default_graph = chart_types[0]["value"]
@@ -521,7 +524,7 @@ def download_structures(selections, page_config, lang):
             if "dataquery" in comp:
                 for dq in comp["dataquery"]:
                     if "dataflow" in dq and dq["dataflow"].strip()!="":
-                        add_structure(enpoint_url, data_structures, dq, lang)
+                        add_structure(endpoint_url, data_structures, dq, lang)
 
 
     return data_structures
@@ -589,7 +592,7 @@ def create_elements(data_struct, selections, page_config, lang):
 
 
 
-
+# Trigger order: 4
 # Triggered when the selection changes. Updates the charts.
 @callback(
     Output(ChartAIO.ids.chart(MATCH), "figure"),
@@ -610,16 +613,128 @@ def create_elements(data_struct, selections, page_config, lang):
     ],
 )
 def update_charts(
-    ddl_value, chart_type, data_structures, selections, page_config, component_id, lang
+    ddl_value, chart_type, data_structures, selections, page_config:dict, component_id, lang
 ):
+    
     #selected_theme = get_theme_node(page_config,selections["theme"])
     print("component_id")
     print(component_id)
+    print("Chart tye")
+    print(chart_type)
     #Find the element in the configuration having the matching uid
     updated_elem = get_element_by_uid(page_config,component_id["aio_id"])
     print(updated_elem)
     # find the data node in the configuration for the user's selection
     data_cfg = updated_elem["dataquery"][int(ddl_value)]
+
+    #Start creating the data
+    df = pd.DataFrame()
+
+    # indicator_name = ""
+    # indic_labels = {}
+    api_call = {"component_id": component_id, "calls": []}
+
+    time_period = [page_config.get(CFG_TIME_PERIOD_START,1900),page_config.get(CFG_TIME_PERIOD_END,None)]
+
+
+    lastnobservations = None
+    if chart_type == "line":
+        lastnobservations = None
+    else:
+        lastnobservations = 1
+
+    print(endpoint_url, data_cfg, time_period,lastnobservations)
+
+    try:
+        # df = get_data(endpoint_url,
+        #     data_cfg, years=time_period, lastnobservations=lastnobservations
+        # )
+        df = get_data_with_labels(endpoint_url, data_cfg, data_structures, cols_to_get_labels=[ID_REF_AREA, ID_DATA_SOURCE], years=time_period, lastnobservations=lastnobservations)
+        # api_call["calls"].append(
+        #     {
+        #         "cfg": data_cfg,
+        #         "years": time_period,
+        #         "lastnobservations": lastnobservations,
+        #     }
+        # )
+    except requests.exceptions.HTTPError as e:
+        print_exception("Exception while downloading data for charts", e)
+        df = pd.DataFrame()
+
+    if df.empty:
+        return EMPTY_CHART, ""
+
+    if len(df) > 0 and "round" in data_cfg and data_cfg["round"]is not None and data_cfg["round"]!="noRound":
+        df = round_pandas_col(df, ID_OBS_VALUE, data_cfg["round"])
+
+    indicator_name = get_code_from_structure_and_dq(
+        data_structures, data_cfg, ID_INDICATOR
+    )["name"]
+
+    df[ID_OBS_VALUE] = pd.to_numeric(df[ID_OBS_VALUE], errors="coerce")
+    df[ID_TIME_PERIOD] = pd.to_numeric(df[ID_TIME_PERIOD], errors="coerce")
+
+    # The source icon and information
+    source = ""
+    display_source = {"display": "none"}
+    if LABEL_COL_PREFIX + ID_DATA_SOURCE in df.columns:
+        source = ", ".join(list(df[LABEL_COL_PREFIX + ID_DATA_SOURCE].unique()))
+    if source != "":
+        display_source = {"display": "visible"}
+
+    # The missing areas:
+    missing_areas = ""
+    if "force_ref_areas" in data_cfg:
+        areas_to_force = data_cfg["force_ref_areas"] # e.g. "AFG+BGD+BTN+IND+MDV+NPL+PAK+LKA"
+        areas_to_force = areas_to_force.split("+")
+        existing_ref_areas = list(df[ID_REF_AREA].unique())
+
+        miss = [a for a in areas_to_force if a not in existing_ref_areas]
+        miss = [
+            get_label_from_structure_and_code(
+                data_structures, data_cfg["dataflow"], ID_REF_AREA, a
+            )
+            for a in miss
+        ]
+        if len(miss) > 0:
+            missing_areas = "No data for: " + ", ".join(miss)
+
+    # set the chart title, wrap the text when the indicator name is too long
+    chart_title = textwrap.wrap(
+        indicator_name,
+        width=55,
+    )
+    chart_title = "<br>".join(chart_title)
+
+    #Build the chart's options
+    chart_options_static = {
+        "bar":{"barmode":"group"},
+        "line":{"line_shape":"spline", "render_mode":"svg"}
+    }
+    chart_options = chart_options_static[chart_type]
+    chart_options["color_discrete_sequence"] = UNICEF_color_qualitative
+    for opt_k, opt_val in updated_elem[CHART_TYPE_NODE_PREFIX + chart_type].items():
+        chart_options[opt_k]=opt_val
+    
+    chart_options_xaxis = {"categoryorder": "total descending"}
+    if chart_type == "line":
+        chart_options_xaxis["tickformat"] = "d"
+
+    # set the layout to center the chart title and change its font size and color
+    layout = go.Layout(
+        title=chart_title,
+        title_x=0.5,
+        font=dict(family=default_font_family, size=default_font_size),
+        legend=dict(x=0.9, y=0.5),
+        xaxis=chart_options_xaxis,
+        modebar={"orientation": "v"},
+    )
+
+    fig = getattr(px, chart_type)(df, **chart_options)
+    fig.update_layout(layout)
+    
+    return fig, source, display_source, missing_areas, json.dumps(api_call)
+
 
 
 

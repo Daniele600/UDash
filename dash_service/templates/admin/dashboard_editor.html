@@ -53,15 +53,147 @@
     const LABEL_WIDTH = 20;
     //UI settings end
 
+    const get_time_period = function () {
+        return {
+            "label": "",
+            "columns": [
+                {
+                    "components": [
+                        {
+                            "label": "Start year",
+                            "applyMaskOn": "change",
+                            "mask": false,
+                            "tableView": false,
+                            "delimiter": false,
+                            "requireDecimal": false,
+                            "inputFormat": "plain",
+                            "truncateMultipleSpaces": false,
+                            "key": "year_start",
+                            "type": "number",
+                            "input": true,
+                            "defaultValue": 2000,
+                            "decimalLimit": 0,
+                            labelPosition: "left-right",
+                            "labelWidth": 20,
+                            "validate": {
+                                "min": 1900
+                            }
+                        }
+                    ],
+                    "width": 6,
+                    "offset": 0,
+                    "push": 0,
+                    "pull": 0,
+                    "size": "md",
+                    "currentWidth": 6
+                },
+                {
+                    "components": [
+                        {
+                            "label": "End year (empty = current year)",
+
+                            "applyMaskOn": "change",
+                            "mask": false,
+                            "tableView": false,
+                            "delimiter": false,
+                            "requireDecimal": false,
+                            "inputFormat": "plain",
+                            "truncateMultipleSpaces": false,
+                            "key": "year_end",
+                            "type": "number",
+                            "input": true,
+                            labelPosition: "left-right",
+                            "labelWidth": 50,
+                        }
+                    ],
+                    "width": 6,
+                    "offset": 0,
+                    "push": 0,
+                    "pull": 0,
+                    "size": "md",
+                    "currentWidth": 6
+                }
+            ],
+            "key": "columns",
+            "type": "columns",
+            "input": false,
+            "tableView": false
+        }
+    }
+
+    const get_chart_options_bar = function(){
+        return{
+            key: "chart_type_bar",
+            type: "container",
+            label: "",
+            input: true,
+            tableView: false,
+            conditional: { show: true, json: { "==": [{ var: "row.element_type" }, "chart"] } },
+            components: [{
+                label: "Bar chart", tableView: true, key: "is_active", type: "checkbox", input: true, labelPosition: LABEL_POSITION, labelWidth: LABEL_WIDTH,
+                // logic:[{
+                //     "name": "bb",
+                //     "trigger": {
+                //         "type": "javascript",
+                //         "javascript": "console.log('row');console.log(row);console.log(component);console.log(data);result = row.chart_type_line.is_active"
+                //     },
+                //     "actions": [
+                //         {
+                //             "name": "aa",
+                //             "type": "property",
+                //             "property": {
+                //                 "label": "Title",
+                //                 "value": "title",
+                //                 "type": "string"
+                //             },
+                //             "text": "row"
+                //         }
+                //     ]
+                // }],
+            },
+            {
+                key: "chart_options",
+                type: "container",
+                label: "",
+                input: true,
+                tableView: false,
+                //conditional: { show: true, json: { "==": [{ var: "row.element_type" }, "chart"] } },
+
+                logic:[{
+                    "name": "aa",
+                    "trigger": {
+                        "type": "javascript",
+                        "javascript": "console.log('row');console.log(row);console.log(component);console.log(data);result = row.chart_type_line.is_active"
+                    },
+                    "actions": [
+                        {
+                            "name": "aa",
+                            "type": "property",
+                            "property": {
+                                "label": "Title",
+                                "value": "title",
+                                "type": "string"
+                            },
+                            "text": "row"
+                        }
+                    ]
+                }],
+
+
+                //data[theme_components_1][1][chart_type_line][is_active]
+                components: [{ label: "X axis", tableView: true, key: "x", type: "textfield", input: true, labelPosition: LABEL_POSITION, labelWidth: LABEL_WIDTH },
+                { label: "Y axis", tableView: true, key: "y", type: "textfield", input: true, labelPosition: LABEL_POSITION, labelWidth: LABEL_WIDTH, }]
+            }
+            ]
+        }
+    }
+
     const get_chart_type_options = function (chart_type) {
-        //let key_is_active = "";
         let label = "";
         if (chart_type == "bar") {
-            //key_is_active = "chart_bar_isactive";
             label = "Bar chart";
         }
         else if (chart_type == "line") {
-            //key_is_active = "line_bar_isactive";
             label = "Line chart";
         }
         return {
@@ -74,49 +206,63 @@
             tableView: false,
             conditional: { show: true, json: { "==": [{ var: "row.element_type" }, "chart"] } },
 
+
             components: [{
+                label: label, tableView: true, key: "is_active", type: "checkbox", input: true, labelPosition: LABEL_POSITION, labelWidth: LABEL_WIDTH,
+                logic:[{
+                    "name": "bb",
+                    "trigger": {
+                        "type": "javascript",
+                        "javascript": "console.log('row');console.log(row);console.log(component);console.log(data);result = row.chart_type_line.is_active"
+                    },
+                    "actions": [
+                        {
+                            "name": "aa",
+                            "type": "property",
+                            "property": {
+                                "label": "Title",
+                                "value": "title",
+                                "type": "string"
+                            },
+                            "text": "row"
+                        }
+                    ]
+                }],
+            },
+            {
+                key: "chart_options",
+                type: "container",
                 label: "",
-                key: "col_chart_type_options",
-                type: "columns",
-                
-                input: false,
+                input: true,
                 tableView: false,
-                columns: [
-                    {
-                        width: 2,
-                        offset: 0,
-                        push: 0,
-                        pull: 0,
-                        size: "md",
-                        currentWidth: 2,
-                        components: [{
-                            label: label, tableView: true, key: "is_active", type: "checkbox", input: true, labelPosition: LABEL_POSITION, labelWidth: LABEL_WIDTH,
-                        }]
-                    },
-                    {
-                        width: 5,
-                        offset: 0,
-                        push: 0,
-                        pull: 0,
-                        size: "md",
-                        currentWidth: 5,
-                        components: [{
-                            label: "X axis", tableView: true, key: "chart_x", type: "textfield", input: true, labelPosition: LABEL_POSITION, labelWidth: LABEL_WIDTH,
-                        }]
-                    },
-                    {
-                        width: 5,
-                        offset: 0,
-                        push: 0,
-                        pull: 0,
-                        size: "md",
-                        currentWidth: 5,
-                        components: [{
-                            label: "Y axis", tableView: true, key: "chart_y", type: "textfield", input: true, labelPosition: LABEL_POSITION, labelWidth: LABEL_WIDTH,
-                        }]
-                    }
-                ]
-            }]
+                //conditional: { show: true, json: { "==": [{ var: "row.element_type" }, "chart"] } },
+
+                // logic:[{
+                //     "name": "aa",
+                //     "trigger": {
+                //         "type": "javascript",
+                //         "javascript": "console.log('row');console.log(row.element_type);console.log(component);console.log(data);result = row.chart_type_line.is_active"
+                //     },
+                //     "actions": [
+                //         {
+                //             "name": "aa",
+                //             "type": "property",
+                //             "property": {
+                //                 "label": "Title",
+                //                 "value": "title",
+                //                 "type": "string"
+                //             },
+                //             "text": "row"
+                //         }
+                //     ]
+                // }],
+
+
+                //data[theme_components_1][1][chart_type_line][is_active]
+                components: [{ label: "X axis", tableView: true, key: "x", type: "textfield", input: true, labelPosition: LABEL_POSITION, labelWidth: LABEL_WIDTH },
+                { label: "Y axis", tableView: true, key: "y", type: "textfield", input: true, labelPosition: LABEL_POSITION, labelWidth: LABEL_WIDTH, }]
+            }
+            ]
         }
     }
 
@@ -129,26 +275,10 @@
             "input": false,
             "tableView": false,
             "components": [
-                // {
-                //     type: "selectboxes",
-                //     label: "Chart type",
-                //     optionsLabelPosition: "right",
-                //     inline: true,
-                //     tableView: false,
-                //     key: "chart_type",
-                //     input: true,
-                //     values: [{ label: "Bar", value: "bar" }, { label: "Line", value: "line" }],
-                //     defaultValue: "bar",
-                //     labelPosition: LABEL_POSITION,
-                //     labelWidth: LABEL_WIDTH,
 
-                //     conditional: { show: true, json: { "==": [{ var: "row.element_type" }, "chart"] } }
-
-                // },
-
-
-                get_chart_type_options("bar"),
-                get_chart_type_options("line"),
+                // get_chart_type_options("bar"),
+                // get_chart_type_options("line"),
+                get_chart_options_bar(),
 
                 {
                     type: "textfield",
@@ -236,8 +366,50 @@
                 labelPosition: LABEL_POSITION,
                 labelWidth: LABEL_WIDTH,
 
-            }]
+            },
+            {
+                "label": "Round",
+                "widget": "choicesjs",
+                "tableView": true,
+                "key": "round",
+                "type": "select",
+                "input": true,
+                "data": {
+                    "values": [
+                        {
+                            "label": "No round",
+                            "value": "noRound"
+                        },
+                        {
+                            "label": "0",
+                            "value": "0"
+                        },
+                        {
+                            "label": "1",
+                            "value": "1"
+                        },
+                        {
+                            "label": "2",
+                            "value": "2"
+                        },
+                        {
+                            "label": "3",
+                            "value": "3"
+                        },
+                        {
+                            "label": "4",
+                            "value": "4"
+                        },
+                        {
+                            "label": "5",
+                            "value": "5"
+                        }
+                    ]
+                }
+            }
+        ]
     }
+
     const dataflow_id = [{
         type: 'textfield',
         key: 'agency',
@@ -400,23 +572,17 @@
                 },
                 get_chart_options(),
                 {
-                    type: "panel",
-                    key: "pnl_dataquery",
-                    input: false,
-                    tableview: false,
-                    hideLabel: true,
+                    type: "datagrid",
+                    key: "editgrid",
+                    label: "Data",
+                    //modalEdit: true,
 
-                    components: [{
-                        type: "datagrid",
-                        key: "dataquery",
-                        label: "Data",
+                    //displayAsTable: true,
+                    tableView: false,
+                    //disableAddingRemovingRows: true,
+                    components: get_dataquery(),
+                    reorder: true,
 
-                        //displayAsTable: true,
-                        tableView: false,
-                        //disableAddingRemovingRows: true,
-                        components: get_dataquery()
-                    }]
-                    //components: [dataquery]
                 },
             ]
         }
@@ -516,6 +682,7 @@
                     components: dataflow_id,
                 }]
             },
+            get_time_period(),
             //Themes
             {
                 type: "panel",

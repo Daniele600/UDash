@@ -34,10 +34,10 @@ def get_data(data_endpoint_url,cfg_data, years=None, lastnobservations=None, lab
         startperiod = years[0]
         endperiod = years[1]
 
-    if "startperiod" in cfg_data:
-        startperiod = cfg_data["startperiod"]
-    if "endperiod" in cfg_data:
-        endperiod = cfg_data["endperiod"]
+    # if "startperiod" in cfg_data:
+    #     startperiod = cfg_data["startperiod"]
+    # if "endperiod" in cfg_data:
+    #     endperiod = cfg_data["endperiod"]
     dataflow_id_split = cfg_data["dataflow"].split(",")
 
     df = api_access.get_data(
@@ -49,6 +49,15 @@ def get_data(data_endpoint_url,cfg_data, years=None, lastnobservations=None, lab
         labels=labels,
     )
 
+    return df
+
+def get_data_with_labels(data_endpoint_url,cfg_data, data_structures, cols_to_get_labels = None, years=None, lastnobservations=None, labels="id"):
+    df = get_data(data_endpoint_url,cfg_data, years=None, lastnobservations=None, labels="id")
+    # Assign labels to codes
+    if cols_to_get_labels is None:
+        cols_to_get_labels = df.columns
+    for col in cols_to_get_labels:
+        df = merge_with_codelist(df, data_structures, cfg_data["dataflow"], col)
     return df
 
 
@@ -239,3 +248,13 @@ def format_num(n):
     else:
         return n
     return ret.replace("_", " ")
+
+def round_pandas_col(df, col_name, round_to):
+    if len(df) == 0:
+        return df
+    df[col_name] = pd.to_numeric(df[col_name], errors="ignore")
+    if pd.api.types.is_numeric_dtype(df[col_name]):
+        df = df.round({col_name: round_to})
+        if round_to==0:
+            df[col_name] = pd.to_numeric(df[col_name], downcast='integer')
+    return df
