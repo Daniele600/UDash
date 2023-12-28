@@ -121,8 +121,8 @@
         }
     }
 
-    const get_chart_options_bar = function(){
-        return{
+    const get_chart_options_bar = function () {
+        return {
             key: "chart_type_bar",
             type: "container",
             label: "",
@@ -131,25 +131,6 @@
             conditional: { show: true, json: { "==": [{ var: "row.element_type" }, "chart"] } },
             components: [{
                 label: "Bar chart", tableView: true, key: "is_active", type: "checkbox", input: true, labelPosition: LABEL_POSITION, labelWidth: LABEL_WIDTH,
-                // logic:[{
-                //     "name": "bb",
-                //     "trigger": {
-                //         "type": "javascript",
-                //         "javascript": "console.log('row');console.log(row);console.log(component);console.log(data);result = row.chart_type_line.is_active"
-                //     },
-                //     "actions": [
-                //         {
-                //             "name": "aa",
-                //             "type": "property",
-                //             "property": {
-                //                 "label": "Title",
-                //                 "value": "title",
-                //                 "type": "string"
-                //             },
-                //             "text": "row"
-                //         }
-                //     ]
-                // }],
             },
             {
                 key: "chart_options",
@@ -157,30 +138,26 @@
                 label: "",
                 input: true,
                 tableView: false,
-                //conditional: { show: true, json: { "==": [{ var: "row.element_type" }, "chart"] } },
 
-                logic:[{
-                    "name": "aa",
+                logic: [{
+                    "name": "tr_show_chart_options_bar",
                     "trigger": {
                         "type": "javascript",
-                        "javascript": "console.log('row');console.log(row);console.log(component);console.log(data);result = row.chart_type_line.is_active"
+                        "javascript": "return !row.is_active;"
                     },
                     "actions": [
                         {
-                            "name": "aa",
+                            "name": "ac_show_chart_options_bar",
                             "type": "property",
                             "property": {
-                                "label": "Title",
-                                "value": "title",
-                                "type": "string"
+                                "label": "Hidden",
+                                "value": "hidden",
+                                "type": "boolean"
                             },
-                            "text": "row"
+                            "state": true
                         }
                     ]
                 }],
-
-
-                //data[theme_components_1][1][chart_type_line][is_active]
                 components: [{ label: "X axis", tableView: true, key: "x", type: "textfield", input: true, labelPosition: LABEL_POSITION, labelWidth: LABEL_WIDTH },
                 { label: "Y axis", tableView: true, key: "y", type: "textfield", input: true, labelPosition: LABEL_POSITION, labelWidth: LABEL_WIDTH, }]
             }
@@ -188,46 +165,16 @@
         }
     }
 
-    const get_chart_type_options = function (chart_type) {
-        let label = "";
-        if (chart_type == "bar") {
-            label = "Bar chart";
-        }
-        else if (chart_type == "line") {
-            label = "Line chart";
-        }
+    const get_chart_options_line = function () {
         return {
-            //collapsible: false,
-            //hideLabel: true,
-            key: "chart_type_" + chart_type,
+            key: "chart_type_line",
             type: "container",
             label: "",
             input: true,
             tableView: false,
             conditional: { show: true, json: { "==": [{ var: "row.element_type" }, "chart"] } },
-
-
             components: [{
-                label: label, tableView: true, key: "is_active", type: "checkbox", input: true, labelPosition: LABEL_POSITION, labelWidth: LABEL_WIDTH,
-                logic:[{
-                    "name": "bb",
-                    "trigger": {
-                        "type": "javascript",
-                        "javascript": "console.log('row');console.log(row);console.log(component);console.log(data);result = row.chart_type_line.is_active"
-                    },
-                    "actions": [
-                        {
-                            "name": "aa",
-                            "type": "property",
-                            "property": {
-                                "label": "Title",
-                                "value": "title",
-                                "type": "string"
-                            },
-                            "text": "row"
-                        }
-                    ]
-                }],
+                label: "Line chart", tableView: true, key: "is_active", type: "checkbox", input: true, labelPosition: LABEL_POSITION, labelWidth: LABEL_WIDTH,
             },
             {
                 key: "chart_options",
@@ -235,36 +182,34 @@
                 label: "",
                 input: true,
                 tableView: false,
-                //conditional: { show: true, json: { "==": [{ var: "row.element_type" }, "chart"] } },
 
-                // logic:[{
-                //     "name": "aa",
-                //     "trigger": {
-                //         "type": "javascript",
-                //         "javascript": "console.log('row');console.log(row.element_type);console.log(component);console.log(data);result = row.chart_type_line.is_active"
-                //     },
-                //     "actions": [
-                //         {
-                //             "name": "aa",
-                //             "type": "property",
-                //             "property": {
-                //                 "label": "Title",
-                //                 "value": "title",
-                //                 "type": "string"
-                //             },
-                //             "text": "row"
-                //         }
-                //     ]
-                // }],
-
-
-                //data[theme_components_1][1][chart_type_line][is_active]
+                logic: [{
+                    "name": "tr_show_chart_options_line",
+                    "trigger": {
+                        "type": "javascript",
+                        "javascript": "return !row.is_active;"
+                    },
+                    "actions": [
+                        {
+                            "name": "ac_show_chart_options_line",
+                            "type": "property",
+                            "property": {
+                                "label": "Hidden",
+                                "value": "hidden",
+                                "type": "boolean"
+                            },
+                            "state": true
+                        }
+                    ]
+                }],
                 components: [{ label: "X axis", tableView: true, key: "x", type: "textfield", input: true, labelPosition: LABEL_POSITION, labelWidth: LABEL_WIDTH },
                 { label: "Y axis", tableView: true, key: "y", type: "textfield", input: true, labelPosition: LABEL_POSITION, labelWidth: LABEL_WIDTH, }]
             }
             ]
         }
     }
+
+    
 
 
     const get_chart_options = function () {
@@ -279,6 +224,7 @@
                 // get_chart_type_options("bar"),
                 // get_chart_type_options("line"),
                 get_chart_options_bar(),
+                get_chart_options_line(),
 
                 {
                     type: "textfield",

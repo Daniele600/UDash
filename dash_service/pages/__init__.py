@@ -52,7 +52,7 @@ def get_data(data_endpoint_url,cfg_data, years=None, lastnobservations=None, lab
     return df
 
 def get_data_with_labels(data_endpoint_url,cfg_data, data_structures, cols_to_get_labels = None, years=None, lastnobservations=None, labels="id"):
-    df = get_data(data_endpoint_url,cfg_data, years=None, lastnobservations=None, labels="id")
+    df = get_data(data_endpoint_url,cfg_data, years, lastnobservations, labels)
     # Assign labels to codes
     if cols_to_get_labels is None:
         cols_to_get_labels = df.columns

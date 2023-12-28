@@ -615,23 +615,14 @@ def create_elements(data_struct, selections, page_config, lang):
 def update_charts(
     ddl_value, chart_type, data_structures, selections, page_config:dict, component_id, lang
 ):
-    
-    #selected_theme = get_theme_node(page_config,selections["theme"])
-    print("component_id")
-    print(component_id)
-    print("Chart tye")
-    print(chart_type)
     #Find the element in the configuration having the matching uid
     updated_elem = get_element_by_uid(page_config,component_id["aio_id"])
-    print(updated_elem)
     # find the data node in the configuration for the user's selection
     data_cfg = updated_elem["dataquery"][int(ddl_value)]
 
     #Start creating the data
     df = pd.DataFrame()
 
-    # indicator_name = ""
-    # indic_labels = {}
     api_call = {"component_id": component_id, "calls": []}
 
     time_period = [page_config.get(CFG_TIME_PERIOD_START,1900),page_config.get(CFG_TIME_PERIOD_END,None)]
@@ -643,20 +634,8 @@ def update_charts(
     else:
         lastnobservations = 1
 
-    print(endpoint_url, data_cfg, time_period,lastnobservations)
-
     try:
-        # df = get_data(endpoint_url,
-        #     data_cfg, years=time_period, lastnobservations=lastnobservations
-        # )
         df = get_data_with_labels(endpoint_url, data_cfg, data_structures, cols_to_get_labels=[ID_REF_AREA, ID_DATA_SOURCE], years=time_period, lastnobservations=lastnobservations)
-        # api_call["calls"].append(
-        #     {
-        #         "cfg": data_cfg,
-        #         "years": time_period,
-        #         "lastnobservations": lastnobservations,
-        #     }
-        # )
     except requests.exceptions.HTTPError as e:
         print_exception("Exception while downloading data for charts", e)
         df = pd.DataFrame()
@@ -697,24 +676,41 @@ def update_charts(
             for a in miss
         ]
         if len(miss) > 0:
-            missing_areas = "No data for: " + ", ".join(miss)
+            missing_areas = "No data for: " + ", ".join(miss)         
 
     # set the chart title, wrap the text when the indicator name is too long
     chart_title = textwrap.wrap(
         indicator_name,
         width=55,
     )
-    chart_title = "<br>".join(chart_title)
+    chart_title = "<br>".join(chart_title) 
 
     #Build the chart's options
     chart_options_static = {
-        "bar":{"barmode":"group"},
-        "line":{"line_shape":"spline", "render_mode":"svg"}
+        "bar":{"barmode":"group", "hover_name":"TIME_PERIOD"},
+        "line":{"line_shape":"spline", "render_mode":"svg", "hover_name":"TIME_PERIOD", "color":"REF_AREA"}
     }
     chart_options = chart_options_static[chart_type]
-    chart_options["color_discrete_sequence"] = UNICEF_color_qualitative
-    for opt_k, opt_val in updated_elem[CHART_TYPE_NODE_PREFIX + chart_type].items():
+    if "color_discrete_sequence" not in chart_options:
+        chart_options["color_discrete_sequence"] = UNICEF_color_qualitative
+        #chart_options["color_discrete_sequence"] = UNICEF_color_qualitative
+    for opt_k, opt_val in updated_elem[CHART_TYPE_NODE_PREFIX + chart_type]["chart_options"].items():
         chart_options[opt_k]=opt_val
+
+    #Find the labels for the codes
+    options_to_check_for_label = ["x", "y", "text", "color", "hover_name"] #We must replace the code by the label for the following properties of the chart: axis (x,y), text, color...
+    for o in options_to_check_for_label:
+        if o in chart_options and LABEL_COL_PREFIX + chart_options[o] in df.columns:
+                chart_options[o] = LABEL_COL_PREFIX + chart_options[o]
+
+    labels = {    }
+    for col in df.columns:
+        if not col.startswith(LABEL_COL_PREFIX): #it is not a Labels column (it was added in a previous step and marked by appending the LABEL_COL_PREFIX)
+            labels[col] = get_col_name(data_structures, data_cfg["dataflow"], col, lang, translations)
+            if LABEL_COL_PREFIX + col in df.columns:
+                labels[LABEL_COL_PREFIX + col] = labels[col]
+    chart_options["labels"]=labels
+    
     
     chart_options_xaxis = {"categoryorder": "total descending"}
     if chart_type == "line":
@@ -732,6 +728,9 @@ def update_charts(
 
     fig = getattr(px, chart_type)(df, **chart_options)
     fig.update_layout(layout)
+
+    if chart_type=="line":
+        fig.update_traces({"mode": "lines+markers"})
     
     return fig, source, display_source, missing_areas, json.dumps(api_call)
 
