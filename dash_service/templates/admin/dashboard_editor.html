@@ -209,7 +209,57 @@
         }
     }
 
-    
+    const get_chart_options_map = function () {
+        return {
+            key: "chart_type_map",
+            type: "container",
+            label: "",
+            input: true,
+            tableView: false,
+            conditional: { show: true, json: { "==": [{ var: "row.element_type" }, "map"] } },
+            components: [
+                {
+                    key: "chart_options",
+                    type: "container",
+                    label: "",
+                    input: true,
+                    tableView: false,
+                    components: [{
+                        type: "textfield",
+                        label: "Zoom",
+                        inline: true,
+                        tableView: false,
+                        key: "zoom",
+                        input: true,
+                        labelPosition: LABEL_POSITION,
+                        labelWidth: LABEL_WIDTH,
+                    },
+                    {
+                        type: "textfield",
+                        label: "Latitude",
+                        inline: true,
+                        tableView: false,
+                        key: "latitude",
+                        input: true,
+                        labelPosition: LABEL_POSITION,
+                        labelWidth: LABEL_WIDTH,
+                    },
+                    {
+                        type: "textfield",
+                        label: "Longitude",
+                        inline: true,
+                        tableView: false,
+                        key: "longitude",
+                        input: true,
+                        labelPosition: LABEL_POSITION,
+                        labelWidth: LABEL_WIDTH,
+                    }]
+                }
+            ]
+        }
+    }
+
+
 
 
     const get_chart_options = function () {
@@ -225,40 +275,9 @@
                 // get_chart_type_options("line"),
                 get_chart_options_bar(),
                 get_chart_options_line(),
+                get_chart_options_map(),
 
-                {
-                    type: "textfield",
-                    label: "Zoom",
-                    inline: true,
-                    tableView: false,
-                    key: "zoom",
-                    input: true,
-                    labelPosition: LABEL_POSITION,
-                    labelWidth: LABEL_WIDTH,
-                    conditional: { show: true, json: { "==": [{ var: "row.element_type" }, "map"] } }
-                },
-                {
-                    type: "textfield",
-                    label: "Latitude",
-                    inline: true,
-                    tableView: false,
-                    key: "latitude",
-                    input: true,
-                    labelPosition: LABEL_POSITION,
-                    labelWidth: LABEL_WIDTH,
-                    conditional: { show: true, json: { "==": [{ var: "row.element_type" }, "map"] } }
-                },
-                {
-                    type: "textfield",
-                    label: "Longitude",
-                    inline: true,
-                    tableView: false,
-                    key: "longitude",
-                    input: true,
-                    labelPosition: LABEL_POSITION,
-                    labelWidth: LABEL_WIDTH,
-                    conditional: { show: true, json: { "==": [{ var: "row.element_type" }, "map"] } }
-                }]
+            ]
         }
     }
 

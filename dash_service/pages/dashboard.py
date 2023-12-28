@@ -691,9 +691,7 @@ def update_charts(
         "line":{"line_shape":"spline", "render_mode":"svg", "hover_name":"TIME_PERIOD", "color":"REF_AREA"}
     }
     chart_options = chart_options_static[chart_type]
-    if "color_discrete_sequence" not in chart_options:
-        chart_options["color_discrete_sequence"] = UNICEF_color_qualitative
-        #chart_options["color_discrete_sequence"] = UNICEF_color_qualitative
+    chart_options["color_discrete_sequence"] = UNICEF_color_qualitative
     for opt_k, opt_val in updated_elem[CHART_TYPE_NODE_PREFIX + chart_type]["chart_options"].items():
         chart_options[opt_k]=opt_val
 
@@ -703,7 +701,7 @@ def update_charts(
         if o in chart_options and LABEL_COL_PREFIX + chart_options[o] in df.columns:
                 chart_options[o] = LABEL_COL_PREFIX + chart_options[o]
 
-    labels = {    }
+    labels = {}
     for col in df.columns:
         if not col.startswith(LABEL_COL_PREFIX): #it is not a Labels column (it was added in a previous step and marked by appending the LABEL_COL_PREFIX)
             labels[col] = get_col_name(data_structures, data_cfg["dataflow"], col, lang, translations)
@@ -734,6 +732,157 @@ def update_charts(
     
     return fig, source, display_source, missing_areas, json.dumps(api_call)
 
+# Triggered when the Map area changes: show historical data is changed or indicator selected
+@callback(
+    Output(MapAIO.ids.graph(MATCH), "figure"),
+    Output(MapAIO.ids.info_text(MATCH), "children"),
+    Output(MapAIO.ids.info_icon(MATCH), "style"),
+    Output(MapAIO.ids.map_timpe_period(MATCH), "children"),
+    Output(MapAIO.ids.download_api_call(MATCH), "value"),
+    [
+        Input(MapAIO.ids.ddl(MATCH), "value"),
+        Input(MapAIO.ids.toggle_historical(MATCH), "value"),
+        # Input("data_structures", "data"),
+    ],
+    [
+        Input("data_structures", "data"),
+        State("sel_state", "data"),
+        State("page_config", "data"),
+        State("geoj", "data"),
+        State(MapAIO.ids.card_title(MATCH), "id"),
+        State("lang", "data"),
+    ],
+)
+def update_maps(
+    ddl_value,
+    show_historical_data,
+    data_structures,
+    selections,
+    page_config,
+    geoj,
+    component_id,
+    lang,
+):
+    
+    #ret
+    source = None
+    display_source = None
+    time_periods_in_df = None
+
+    #Find the element in the configuration having the matching uid
+    updated_elem = get_element_by_uid(page_config,component_id["aio_id"])
+    # find the data node in the configuration for the user's selection
+    data_cfg = updated_elem["dataquery"][int(ddl_value)]
+
+    #Start creating the data
+    df = pd.DataFrame()
+    api_call = {"component_id": component_id, "calls": []}
+    time_period = [page_config.get(CFG_TIME_PERIOD_START,1900),page_config.get(CFG_TIME_PERIOD_END,None)]
+
+    lastnobs = None
+    if not show_historical_data:
+        lastnobs = 1
+    try:
+        df = get_data_with_labels(endpoint_url, data_cfg, data_structures, cols_to_get_labels=[ID_REF_AREA, ID_DATA_SOURCE], years=time_period, lastnobservations=lastnobs)
+        api_call["calls"].append(
+            {
+                "cfg": data_cfg,
+                "years": time_period,
+                "lastnobservations": lastnobs,
+            }
+        )
+    except requests.exceptions.HTTPError as e:
+        print_exception("Exception while downloading data for maps", e)
+        df = pd.DataFrame()
+
+    if df.empty:
+        return EMPTY_CHART, "", "", ""
+    
+    if len(df) > 0 and "round" in data_cfg and data_cfg["round"]is not None and data_cfg["round"]!="noRound":
+        df = round_pandas_col(df, ID_OBS_VALUE, data_cfg["round"])
+
+    df[ID_OBS_VALUE] = pd.to_numeric(df[ID_OBS_VALUE], errors="coerce")
+    #df[ID_TIME_PERIOD] = pd.to_numeric(df[ID_TIME_PERIOD], errors="coerce")
+    df = df.sort_values(by=ID_TIME_PERIOD, ascending=True)
+
+    # The data sources, hide the icon if data source is ""
+    source = ""
+    display_source = {"display": "none"}
+    if ID_DATA_SOURCE in df.columns:
+        # use the _L_ column that has been generated at the "merge_with_codelist" step
+        source = ", ".join(list(df[LABEL_COL_PREFIX + ID_DATA_SOURCE].unique()))
+    if source != "":
+        display_source = {"display": "visible"}
+
+    chart_options = {"locations": "REF_AREA",
+                     "featureidkey": "id",
+                     "color": "OBS_VALUE",
+                     "mapbox_style": "carto-positron",
+                     "opacity": 0.5,
+                        "hover_data": {
+                           "OBS_VALUE": True,
+                           "REF_AREA": False,
+                           "TIME_PERIOD": True
+                        },
+                        "animation_frame": "TIME_PERIOD",
+                        "height": 750
+                     }
+    labels = {}
+    for col in df.columns:
+        if not col.startswith(LABEL_COL_PREFIX): #it is not a Labels column (it was added in a previous step and marked by appending the LABEL_COL_PREFIX)
+            labels[col] = get_col_name(data_structures, data_cfg["dataflow"], col, lang, translations)
+            if LABEL_COL_PREFIX + col in df.columns:
+                labels[LABEL_COL_PREFIX + col] = labels[col]
+    chart_options["labels"]=labels
+
+    map_chart_options_node = updated_elem[CHART_TYPE_NODE_PREFIX + "map"]["chart_options"]
+    items_to_skip = ["latitude","longitude"]
+    for opt_k, opt_val in map_chart_options_node.items():
+        if opt_k not in items_to_skip:
+            chart_options[opt_k]=opt_val
+    # This chart has hides some data in the Hover, also hide the label columns for coded dimensions (are added when merged with codelists)
+    if "hover_data" in chart_options:
+        hover_keys = list(chart_options["hover_data"].keys())
+        for hover_k in hover_keys:
+            if LABEL_COL_PREFIX + hover_k in df.columns:
+                if chart_options["hover_data"][hover_k]:
+                    chart_options["hover_data"][hover_k] = False
+                    chart_options["hover_data"][LABEL_COL_PREFIX + hover_k] = True
+                else:
+                    chart_options["hover_data"][LABEL_COL_PREFIX + hover_k] = False
+
+    # the geoJson
+    chart_options["geojson"] = get_geojson(geoj)
+    chart_options["color_continuous_scale"] = UNICEF_color_continuous_scale
+    chart_options["center"]={"lat":float(map_chart_options_node["latitude"]),"lon":float(map_chart_options_node["longitude"])}
+    chart_options["zoom"]=int(chart_options["zoom"])
+
+    if not show_historical_data:
+        del chart_options["animation_frame"]
+    main_figure = px.choropleth_mapbox(df, **chart_options)
+    main_figure.update_layout(
+        margin={"r": 0, "t": 1, "l": 2, "b": 1},
+        font=dict(family=default_font_family, size=default_font_size),
+    )
+
+    time_periods_in_df = ""
+    if not show_historical_data:
+        time_periods_in_df = list(df["TIME_PERIOD"].unique())
+        time_periods_in_df.sort()
+        time_periods_in_df = f"{get_multilang_value(translations['TIME_PERIOD'], lang)}: {', '.join(time_periods_in_df)}"
+
+    return main_figure, source, display_source, time_periods_in_df, json.dumps(api_call)
+    
+
+    
+
+    '''
+        try:
+        df = get_data_with_labels(endpoint_url, data_cfg, data_structures, cols_to_get_labels=[ID_REF_AREA, ID_DATA_SOURCE], years=time_period, lastnobservations=lastnobservations)
+    except requests.exceptions.HTTPError as e:
+        print_exception("Exception while downloading data for charts", e)
+        df = pd.DataFrame()
+    '''
 
 
 
